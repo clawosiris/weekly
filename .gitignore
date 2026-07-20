@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Logs and local runtime state
+*.log
+*.jsonl
+*.trajectory.jsonl
+.cache/
+.tmp/
+tmp/*
+!tmp/.gitkeep
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
+auth*.json
+*token*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# OpenClaw private workspace data
+agents/
+cron/
+identity/
+matrix/
+sandbox/
+sandboxes/
+state/
+memory/
+openclaw.json*
+workspace-state.json
+openclaw-workspace-state.json
