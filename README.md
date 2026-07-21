@@ -8,6 +8,10 @@ The original OpenClaw workspace contains private assistant memory, credentials, 
 
 Initial repository scaffold. Source code should be added through reviewed commits.
 
+## Product Goals
+
+The draft product requirements live in [docs/PRD.md](docs/PRD.md). GitHub issues should capture discussion and open questions; accepted decisions should be reflected back into the PRD.
+
 ## License
 
 This project is licensed under the GNU Affero General Public License version 3 or any later version. See [LICENSE](LICENSE).
