@@ -1,12 +1,19 @@
-# Nora & Osiris OpenClaw Project
+# Weekly
 
-This repository is a clean, public-ready home for the Nora & Osiris OpenClaw work.
+This repository is a clean, public-ready home for Weekly, Nora's planner and
+checklist dashboard project.
 
 The original OpenClaw workspace contains private assistant memory, credentials, local runtime state, and generated logs. Do not copy workspace contents into this repository without reviewing them first.
 
 ## Status
 
-Initial repository scaffold. Source code should be added through reviewed commits.
+Initial repository scaffold with a static dashboard prototype and product draft.
+
+## Dashboard Concept
+
+- [Product requirements](docs/weekly-dashboard/PRD.md)
+- [Original UI sketch](docs/weekly-dashboard/ui-sketch.html)
+- [Static prototype](prototype/weekly-dashboard/index.html)
 
 ## Product Goals
 
