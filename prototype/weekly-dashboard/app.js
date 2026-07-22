@@ -251,7 +251,7 @@ function renderDayCards(week) {
     card.querySelector(".day-date").textContent = formatShortDate(day.date);
     card.querySelector(".small-donut").style.setProperty("--value", stats.percent);
     card.querySelector(".small-donut span").textContent = `${stats.percent}%`;
-    card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed`;
+    card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed tasks`;
 
     const checklist = card.querySelector(".checklist");
     if (!scheduledTasks.length) {
