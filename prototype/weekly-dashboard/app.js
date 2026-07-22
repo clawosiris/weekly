@@ -15,6 +15,7 @@ const defaultTasks = [
 ];
 
 let state = loadState();
+let editingTaskId = null;
 
 const els = {
   weekStart: document.querySelector("#weekStart"),
@@ -30,6 +31,8 @@ const els = {
   taskForm: document.querySelector("#taskForm"),
   taskName: document.querySelector("#taskName"),
   taskCategory: document.querySelector("#taskCategory"),
+  taskSubmit: document.querySelector("#taskSubmit"),
+  cancelTaskEdit: document.querySelector("#cancelTaskEdit"),
   newTaskDays: document.querySelector("#newTaskDays"),
   mapperHead: document.querySelector("#mapperHead"),
   mapperBody: document.querySelector("#mapperBody"),
@@ -96,19 +99,30 @@ function bindEvents() {
     if (!name) return;
 
     const days = [...els.newTaskDays.querySelectorAll("input:checked")].map((input) => Number(input.value));
-    state.tasks.push({
-      id: `task-${Date.now().toString(36)}`,
+    const nextTask = {
       name,
       category: els.taskCategory.value,
       days: days.length ? days : [0, 1, 2, 3, 4, 5, 6]
-    });
-    els.taskForm.reset();
-    els.newTaskDays.querySelectorAll("input").forEach((input) => {
-      input.checked = true;
-    });
+    };
+
+    if (editingTaskId) {
+      const task = state.tasks.find((item) => item.id === editingTaskId);
+      if (task) {
+        Object.assign(task, nextTask);
+      }
+    } else {
+      state.tasks.push({
+        id: `task-${Date.now().toString(36)}`,
+        ...nextTask
+      });
+    }
+
+    resetTaskForm();
     saveState();
     render();
   });
+
+  els.cancelTaskEdit.addEventListener("click", resetTaskForm);
 }
 
 function render() {
@@ -140,6 +154,34 @@ function renderDayPicker() {
       <span>${day}</span>
     </label>
   `).join("");
+}
+
+function resetTaskForm() {
+  editingTaskId = null;
+  els.taskForm.reset();
+  els.taskName.placeholder = "Add a task";
+  els.taskSubmit.textContent = "Add task";
+  els.cancelTaskEdit.hidden = true;
+  els.newTaskDays.querySelectorAll("input").forEach((input) => {
+    input.checked = true;
+  });
+}
+
+function editTask(taskId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+
+  editingTaskId = task.id;
+  els.taskName.value = task.name;
+  els.taskName.placeholder = "Edit task";
+  els.taskCategory.value = task.category;
+  els.newTaskDays.querySelectorAll("input").forEach((input) => {
+    input.checked = task.days.includes(Number(input.value));
+  });
+  els.taskSubmit.textContent = "Save task";
+  els.cancelTaskEdit.hidden = false;
+  els.taskForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  els.taskName.focus();
 }
 
 function renderTasksChart(week) {
@@ -241,7 +283,7 @@ function renderMapper() {
     <tr>
       <th class="task-cell">Task</th>
       ${dayNames.map((day) => `<th>${day}</th>`).join("")}
-      <th>Delete</th>
+      <th>Actions</th>
     </tr>
   `;
 
@@ -257,7 +299,10 @@ function renderMapper() {
         </td>
       `).join("")}
       <td>
-        <button class="delete-button" type="button" data-delete="${task.id}" title="Delete task" aria-label="Delete ${escapeHtml(task.name)}">×</button>
+        <div class="row-actions">
+          <button class="edit-button" type="button" data-edit="${task.id}" title="Edit task" aria-label="Edit ${escapeHtml(task.name)}">Edit</button>
+          <button class="delete-button" type="button" data-delete="${task.id}" title="Delete task" aria-label="Delete ${escapeHtml(task.name)}">×</button>
+        </div>
       </td>
     </tr>
   `).join("") || `<tr><td colspan="9" class="empty-state">Add a task definition to begin.</td></tr>`;
@@ -279,6 +324,10 @@ function renderMapper() {
     });
   });
 
+  els.mapperBody.querySelectorAll("[data-edit]").forEach((button) => {
+    button.addEventListener("click", () => editTask(button.dataset.edit));
+  });
+
   els.mapperBody.querySelectorAll("[data-delete]").forEach((button) => {
     button.addEventListener("click", () => {
       const taskId = button.dataset.delete;
@@ -286,6 +335,9 @@ function renderMapper() {
       Object.keys(state.completions).forEach((dayKey) => {
         delete state.completions[dayKey][taskId];
       });
+      if (editingTaskId === taskId) {
+        resetTaskForm();
+      }
       saveState();
       render();
     });

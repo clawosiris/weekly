@@ -115,6 +115,8 @@ h2 {
 .icon-button,
 .tab-button,
 .primary-button,
+.secondary-button,
+.edit-button,
 .delete-button {
   border: 0;
   border-radius: 8px;
@@ -522,6 +524,19 @@ h2 {
   font-weight: 900;
 }
 
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.secondary-button {
+  padding: 0 14px;
+  background: #edf3f5;
+  color: var(--muted);
+  font-weight: 900;
+}
+
 .mapper-panel {
   min-width: 0;
 }
@@ -551,6 +566,21 @@ h2 {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.edit-button {
+  min-height: 36px;
+  padding: 0 10px;
+  background: #eef3ff;
+  color: var(--navy);
+  font-size: 0.76rem;
+  font-weight: 900;
 }
 
 .delete-button {

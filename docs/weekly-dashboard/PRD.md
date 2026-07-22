@@ -66,8 +66,10 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Task definition list or matrix:
   - one row per task
   - one toggle per weekday
+  - edit action per task
   - delete action per task
 - Updating mapped days changes future dashboard rendering for the selected week.
+- Editing a task lets the user change its name, category, and mapped days without losing existing completion history.
 - Deleting a task removes it from the mapper and checklists.
 
 ### Aggregation
@@ -118,6 +120,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Task names must be required and trimmed.
 - Task names should support at least 80 characters.
 - Delete actions must remove old completion records for the deleted task.
+- Edit actions must preserve the existing task ID and completion records.
 - Completion state must be date-specific, not only weekday-specific.
 - The dashboard must update immediately after task, mapping, or completion changes.
 - The mobile layout must preserve the same core actions:
@@ -125,6 +128,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
   - switch views
   - check off daily tasks
   - add tasks
+  - edit task names and categories
   - edit mapped days
   - delete tasks
 
@@ -144,6 +148,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
   - icon buttons for week navigation
   - tabs for Dashboard and Mapper
   - checkboxes or toggles for mapped days
+  - edit button/action for task name and category changes
   - delete icon/button for task removal
 - Empty states should be clear:
   - no tasks yet
@@ -231,6 +236,7 @@ See `ui-sketch.html` for a standalone visual wireframe.
 
 - A user can add a task and immediately see it in the mapper.
 - A user can map that task to selected days and immediately see it on those day cards.
+- A user can edit an existing task's name, category, and mapped days without losing previous checkoffs.
 - A user can check off a mapped task and see day and week completion update.
 - A user can delete a task and no longer see it in any day checklist or mapper row.
 - Refreshing the browser preserves tasks, mapped days, selected week, and completions.
