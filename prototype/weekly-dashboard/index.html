@@ -35,6 +35,22 @@
       <main>
         <section class="view is-active" id="dashboardView" aria-label="Dashboard">
           <section class="summary-grid" aria-label="Weekly summary">
+            <article class="panel matrix-preview">
+              <div class="panel-heading">
+                <h2>Weekly Habits</h2>
+                <span id="habitSummaryCount">0 habits</span>
+              </div>
+              <div class="mini-matrix" id="habitMatrix"></div>
+            </article>
+
+            <article class="panel chart-panel">
+              <div class="panel-heading">
+                <h2>Habit Progress</h2>
+                <span id="habitProgressCount">0/0 completed</span>
+              </div>
+              <div class="bar-chart" id="habitProgressChart" aria-label="Habit completion by day"></div>
+            </article>
+
             <article class="panel weekly-progress">
               <div class="panel-heading">
                 <h2>Weekly Progress</h2>
@@ -50,22 +66,6 @@
                 <h2>Tasks Progress</h2>
               </div>
               <div class="bar-chart" id="tasksChart" aria-label="Task completion by day"></div>
-            </article>
-
-            <article class="panel matrix-preview">
-              <div class="panel-heading">
-                <h2>Weekly Habits</h2>
-                <span id="habitSummaryCount">0 habits</span>
-              </div>
-              <div class="mini-matrix" id="habitMatrix"></div>
-            </article>
-
-            <article class="panel chart-panel">
-              <div class="panel-heading">
-                <h2>Habit Progress</h2>
-                <span id="habitProgressCount">0/0 completed</span>
-              </div>
-              <div class="bar-chart" id="habitProgressChart" aria-label="Habit completion by day"></div>
             </article>
 
             <article class="panel chart-panel">
