@@ -55,6 +55,7 @@
             <article class="panel matrix-preview">
               <div class="panel-heading">
                 <h2>Weekly Habits</h2>
+                <span id="habitSummaryCount">0 habits</span>
               </div>
               <div class="mini-matrix" id="habitMatrix"></div>
             </article>
@@ -65,6 +66,14 @@
               </div>
               <div class="horizontal-bars" id="dailyBars" aria-label="Daily completion percentages"></div>
             </article>
+          </section>
+
+          <section class="panel habit-tracker-panel" aria-label="Habit tracker">
+            <div class="panel-heading">
+              <h2>Habit Tracker</h2>
+              <span id="habitTrackerCount">0 habits</span>
+            </div>
+            <div class="habit-tracker" id="habitTracker"></div>
           </section>
 
           <section class="days-grid" id="daysGrid" aria-label="Daily checklists"></section>
@@ -109,6 +118,39 @@
                 <table class="mapper-table">
                   <thead id="mapperHead"></thead>
                   <tbody id="mapperBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="mapper-layout habit-mapper-layout">
+            <form class="panel task-form" id="habitForm">
+              <div class="panel-heading">
+                <h2>Habit Definitions</h2>
+              </div>
+              <label>
+                <span>Habit name</span>
+                <input id="habitName" name="habitName" type="text" maxlength="80" placeholder="Add a habit" required>
+              </label>
+              <fieldset>
+                <legend>Map to days</legend>
+                <div class="day-picker" id="newHabitDays"></div>
+              </fieldset>
+              <div class="form-actions">
+                <button class="primary-button" id="habitSubmit" type="submit">Add habit</button>
+                <button class="secondary-button" id="cancelHabitEdit" type="button" hidden>Cancel</button>
+              </div>
+            </form>
+
+            <section class="panel mapper-panel">
+              <div class="panel-heading">
+                <h2>Habit Mapper</h2>
+                <span id="habitTotal">0 habits</span>
+              </div>
+              <div class="mapper-table-wrap">
+                <table class="mapper-table">
+                  <thead id="habitMapperHead"></thead>
+                  <tbody id="habitMapperBody"></tbody>
                 </table>
               </div>
             </section>
