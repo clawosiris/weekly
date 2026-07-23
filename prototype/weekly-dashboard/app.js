@@ -35,6 +35,8 @@ const els = {
   tasksChart: document.querySelector("#tasksChart"),
   habitMatrix: document.querySelector("#habitMatrix"),
   habitSummaryCount: document.querySelector("#habitSummaryCount"),
+  habitProgressChart: document.querySelector("#habitProgressChart"),
+  habitProgressCount: document.querySelector("#habitProgressCount"),
   habitTracker: document.querySelector("#habitTracker"),
   habitTrackerCount: document.querySelector("#habitTrackerCount"),
   dailyBars: document.querySelector("#dailyBars"),
@@ -183,16 +185,19 @@ function render() {
   normalizeWeekInput();
   const week = getWeekDays();
   const stats = getWeekStats(week);
+  const habitStats = getHabitWeekStats(week);
 
   els.weeklyCount.textContent = `${stats.done}/${stats.total} completed`;
   els.weeklyPercent.textContent = `${stats.percent}%`;
   els.weeklyDonut.style.setProperty("--value", stats.percent);
+  els.habitProgressCount.textContent = `${habitStats.done}/${habitStats.total} completed`;
   els.taskTotal.textContent = `${state.tasks.length} ${state.tasks.length === 1 ? "task" : "tasks"}`;
   els.habitTotal.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
   els.habitSummaryCount.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
   els.habitTrackerCount.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
 
   renderTasksChart(week);
+  renderHabitProgressChart(week);
   renderDailyBars(week);
   renderHabitMatrix(week);
   renderHabitTracker(week);
@@ -277,6 +282,20 @@ function renderTasksChart(week) {
       <div class="bar">
         <div class="bar-stack" title="${dayStats.percent}% complete">
           <div class="bar-fill" style="height: ${dayStats.percent}%"></div>
+        </div>
+        <label>${dayNames[index]}</label>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderHabitProgressChart(week) {
+  els.habitProgressChart.innerHTML = week.map((day, index) => {
+    const dayStats = getHabitDayStats(day.key, index);
+    return `
+      <div class="bar">
+        <div class="bar-stack" title="${dayStats.done}/${dayStats.total} habits complete">
+          <div class="bar-fill habit-bar-fill" style="height: ${dayStats.percent}%"></div>
         </div>
         <label>${dayNames[index]}</label>
       </div>
@@ -565,6 +584,26 @@ function getDayStats(dayKey, dayIndex) {
     done,
     total: tasks.length,
     percent: percent(done, tasks.length)
+  };
+}
+
+function getHabitWeekStats(week) {
+  return week.reduce((acc, day, index) => {
+    const dayStats = getHabitDayStats(day.key, index);
+    acc.done += dayStats.done;
+    acc.total += dayStats.total;
+    acc.percent = percent(acc.done, acc.total);
+    return acc;
+  }, { done: 0, total: 0, percent: 0 });
+}
+
+function getHabitDayStats(dayKey, dayIndex) {
+  const habits = state.habits.filter((habit) => habit.days.includes(dayIndex));
+  const done = habits.filter((habit) => isHabitComplete(dayKey, habit.id)).length;
+  return {
+    done,
+    total: habits.length,
+    percent: percent(done, habits.length)
   };
 }
 

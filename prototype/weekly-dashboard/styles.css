@@ -266,6 +266,10 @@ h2 {
   background: linear-gradient(180deg, var(--sky), var(--navy));
 }
 
+.habit-bar-fill {
+  background: linear-gradient(180deg, var(--mint), #5f8f77);
+}
+
 .bar label,
 .daily-row span,
 .matrix-label,

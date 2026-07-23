@@ -61,6 +61,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
   - checklist items scheduled for that day
 - Checking or unchecking a task immediately updates the dashboard and persistence layer.
 - Habit tracker section:
+  - weekly habit progress bar chart
   - one row per habit
   - one checkbox per mapped weekday
   - skipped days shown as inactive
@@ -103,6 +104,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Optional MVP visualization:
   - weekly donut or progress ring
   - daily bar chart
+  - habit progress bar chart
   - compact task-by-day matrix preview
 
 ### Persistence
@@ -290,6 +292,8 @@ See `ui-sketch.html` for a standalone visual wireframe.
 - `dayPercent = dayDone / scheduledTasksForDay.length`
 - `weekPercent = sum(dayDone) / sum(scheduledTasksForDay.length)`
 - `scheduledHabitsForDay = habits where habit.days includes weekdayIndex`
+- `habitDayDone = scheduledHabitsForDay completed for ISO date`
+- `habitDayPercent = habitDayDone / scheduledHabitsForDay.length`
 
 ## Acceptance Criteria
 
