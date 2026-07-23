@@ -324,8 +324,13 @@ function renderHabitMatrix(week) {
       <td class="matrix-label">${escapeHtml(habit.name)}</td>
       ${week.map((day, index) => {
         const scheduled = habit.days.includes(index);
-        const done = scheduled && isHabitComplete(day.key, habit.id);
-        return `<td><span class="checkmark ${done ? "is-on" : ""}">${done ? "✓" : ""}</span></td>`;
+        return `
+          <td>
+            ${scheduled
+              ? `<input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">`
+              : `<span class="habit-off" aria-label="${escapeHtml(habit.name)} is not mapped to ${dayNames[index]}">-</span>`}
+          </td>
+        `;
       }).join("")}
     </tr>
   `).join("");
@@ -341,6 +346,8 @@ function renderHabitMatrix(week) {
       <tbody>${rows || `<tr><td colspan="8" class="empty-state">No habits yet.</td></tr>`}</tbody>
     </table>
   `;
+
+  bindHabitCompletionInputs(els.habitMatrix);
 }
 
 function renderHabitTracker(week) {
@@ -377,7 +384,11 @@ function renderHabitTracker(week) {
     </table>
   `;
 
-  els.habitTracker.querySelectorAll(".habit-checkbox").forEach((input) => {
+  bindHabitCompletionInputs(els.habitTracker);
+}
+
+function bindHabitCompletionInputs(container) {
+  container.querySelectorAll(".habit-checkbox").forEach((input) => {
     input.addEventListener("change", () => {
       setHabitCompletion(input.dataset.day, input.dataset.habit, input.checked);
       render();
