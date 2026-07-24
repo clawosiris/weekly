@@ -554,6 +554,11 @@ h2 {
   overflow-x: auto;
 }
 
+.habit-mapper-table-wrap {
+  display: flex;
+  justify-content: center;
+}
+
 .mapper-table th,
 .mapper-table td {
   padding: 10px 8px;
