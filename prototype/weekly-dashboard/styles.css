@@ -493,8 +493,8 @@ h2 {
   border: 0;
 }
 
-.task-form .day-map-field {
-  gap: 14px;
+.day-map-field .day-picker {
+  margin-top: 14px;
 }
 
 .day-picker {
