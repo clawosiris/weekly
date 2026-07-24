@@ -37,8 +37,6 @@ const els = {
   habitSummaryCount: document.querySelector("#habitSummaryCount"),
   habitProgressChart: document.querySelector("#habitProgressChart"),
   habitProgressCount: document.querySelector("#habitProgressCount"),
-  habitTracker: document.querySelector("#habitTracker"),
-  habitTrackerCount: document.querySelector("#habitTrackerCount"),
   dailyBars: document.querySelector("#dailyBars"),
   daysGrid: document.querySelector("#daysGrid"),
   taskForm: document.querySelector("#taskForm"),
@@ -199,13 +197,11 @@ function render() {
   els.taskTotal.textContent = `${state.tasks.length} ${state.tasks.length === 1 ? "task" : "tasks"}`;
   els.habitTotal.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
   els.habitSummaryCount.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
-  els.habitTrackerCount.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
 
   renderTasksChart(week);
   renderHabitProgressChart(week);
   renderDailyBars(week);
   renderHabitMatrix(week);
-  renderHabitTracker(week);
   renderDayCards(week);
   renderMapper();
   renderHabitMapper();
@@ -342,38 +338,6 @@ function renderHabitMatrix(week) {
   `;
 
   bindHabitCompletionInputs(els.habitMatrix);
-}
-
-function renderHabitTracker(week) {
-  if (!state.habits.length) {
-    els.habitTracker.innerHTML = `<p class="empty-state">No habits yet.</p>`;
-    return;
-  }
-
-  els.habitTracker.innerHTML = `
-    <table class="habit-tracker-table">
-      <thead>
-        <tr>
-          <th>Habit</th>
-          ${dayNames.map((day) => `<th>${day}</th>`).join("")}
-        </tr>
-      </thead>
-      <tbody>
-        ${state.habits.map((habit) => `
-          <tr>
-            <td class="matrix-label">${escapeHtml(habit.name)}</td>
-            ${week.map((day, index) => `
-              <td>
-                <input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">
-              </td>
-            `).join("")}
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-
-  bindHabitCompletionInputs(els.habitTracker);
 }
 
 function bindHabitCompletionInputs(container) {

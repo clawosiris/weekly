@@ -273,8 +273,6 @@ h2 {
 .bar label,
 .daily-row span,
 .matrix-label,
-.habit-tracker-table th,
-.habit-tracker-table td,
 .mapper-table th,
 .mapper-table td {
   font-size: 0.76rem;
@@ -291,7 +289,6 @@ h2 {
 }
 
 .mini-matrix table,
-.habit-tracker-table,
 .mapper-table {
   width: 100%;
   border-collapse: collapse;
@@ -299,8 +296,6 @@ h2 {
 
 .mini-matrix th,
 .mini-matrix td,
-.habit-tracker-table th,
-.habit-tracker-table td,
 .mapper-table th,
 .mapper-table td {
   border-bottom: 1px solid var(--line);
@@ -310,15 +305,12 @@ h2 {
 
 .mini-matrix th:first-child,
 .mini-matrix td:first-child,
-.habit-tracker-table th:first-child,
-.habit-tracker-table td:first-child,
 .mapper-table th:first-child,
 .mapper-table td:first-child {
   text-align: left;
 }
 
 .mini-matrix th,
-.habit-tracker-table th,
 .mapper-table th {
   color: var(--navy);
   font-weight: 900;
@@ -463,24 +455,6 @@ h2 {
   color: var(--muted);
   font-size: 0.85rem;
   text-align: center;
-}
-
-.habit-tracker-panel {
-  margin-bottom: 14px;
-}
-
-.habit-tracker {
-  overflow-x: auto;
-}
-
-.habit-tracker-table th,
-.habit-tracker-table td {
-  padding: 10px 8px;
-  text-align: center;
-}
-
-.habit-tracker-table .matrix-label {
-  min-width: 180px;
 }
 
 .mapper-layout {
@@ -702,7 +676,4 @@ h2 {
     min-width: 760px;
   }
 
-  .habit-tracker-table {
-    min-width: 680px;
-  }
 }
