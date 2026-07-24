@@ -483,11 +483,6 @@ h2 {
   min-width: 180px;
 }
 
-.habit-off {
-  color: #b8c2cb;
-  font-weight: 900;
-}
-
 .mapper-layout {
   display: grid;
   grid-template-columns: minmax(260px, 340px) 1fr;

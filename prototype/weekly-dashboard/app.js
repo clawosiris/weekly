@@ -15,10 +15,10 @@ const defaultTasks = [
 ];
 
 const defaultHabits = [
-  { id: "habit-water", name: "Drink water", days: [0, 1, 2, 3, 4, 5, 6] },
-  { id: "habit-language", name: "Do language", days: [0, 1, 2, 3, 4] },
-  { id: "habit-reading", name: "Read for 15 minutes", days: [0, 1, 2, 3, 4, 5, 6] },
-  { id: "habit-stretch", name: "Stretch", days: [0, 2, 4, 6] }
+  { id: "habit-water", name: "Drink water" },
+  { id: "habit-language", name: "Do language" },
+  { id: "habit-reading", name: "Read for 15 minutes" },
+  { id: "habit-stretch", name: "Stretch" }
 ];
 
 let state = loadState();
@@ -51,7 +51,6 @@ const els = {
   habitName: document.querySelector("#habitName"),
   habitSubmit: document.querySelector("#habitSubmit"),
   cancelHabitEdit: document.querySelector("#cancelHabitEdit"),
-  newHabitDays: document.querySelector("#newHabitDays"),
   mapperHead: document.querySelector("#mapperHead"),
   mapperBody: document.querySelector("#mapperBody"),
   taskTotal: document.querySelector("#taskTotal"),
@@ -64,7 +63,6 @@ init();
 
 function init() {
   renderDayPicker(els.newTaskDays);
-  renderDayPicker(els.newHabitDays);
   bindEvents();
   normalizeWeekInput();
   render();
@@ -78,7 +76,7 @@ function loadState() {
       return {
         weekStart: parsed.weekStart || toDateInput(startOfWeek(new Date())),
         tasks: Array.isArray(parsed.tasks) ? parsed.tasks : defaultTasks,
-        habits: Array.isArray(parsed.habits) ? parsed.habits : defaultHabits,
+        habits: Array.isArray(parsed.habits) ? normalizeHabits(parsed.habits) : defaultHabits,
         completions: parsed.completions && typeof parsed.completions === "object" ? parsed.completions : {},
         habitCompletions: parsed.habitCompletions && typeof parsed.habitCompletions === "object" ? parsed.habitCompletions : {}
       };
@@ -98,6 +96,15 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function normalizeHabits(habits) {
+  return habits
+    .filter((habit) => habit && typeof habit.id === "string" && typeof habit.name === "string")
+    .map((habit) => ({
+      id: habit.id,
+      name: habit.name
+    }));
 }
 
 function bindEvents() {
@@ -155,10 +162,8 @@ function bindEvents() {
     const name = els.habitName.value.trim();
     if (!name) return;
 
-    const days = [...els.newHabitDays.querySelectorAll("input:checked")].map((input) => Number(input.value));
     const nextHabit = {
-      name,
-      days: days.length ? days : [0, 1, 2, 3, 4, 5, 6]
+      name
     };
 
     if (editingHabitId) {
@@ -237,9 +242,6 @@ function resetHabitForm() {
   els.habitName.placeholder = "Add a habit";
   els.habitSubmit.textContent = "Add habit";
   els.cancelHabitEdit.hidden = true;
-  els.newHabitDays.querySelectorAll("input").forEach((input) => {
-    input.checked = true;
-  });
 }
 
 function editTask(taskId) {
@@ -266,9 +268,6 @@ function editHabit(habitId) {
   editingHabitId = habit.id;
   els.habitName.value = habit.name;
   els.habitName.placeholder = "Edit habit";
-  els.newHabitDays.querySelectorAll("input").forEach((input) => {
-    input.checked = habit.days.includes(Number(input.value));
-  });
   els.habitSubmit.textContent = "Save habit";
   els.cancelHabitEdit.hidden = false;
   els.habitForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -322,16 +321,11 @@ function renderHabitMatrix(week) {
   const rows = state.habits.slice(0, 8).map((habit) => `
     <tr>
       <td class="matrix-label">${escapeHtml(habit.name)}</td>
-      ${week.map((day, index) => {
-        const scheduled = habit.days.includes(index);
-        return `
-          <td>
-            ${scheduled
-              ? `<input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">`
-              : `<span class="habit-off" aria-label="${escapeHtml(habit.name)} is not mapped to ${dayNames[index]}">-</span>`}
-          </td>
-        `;
-      }).join("")}
+      ${week.map((day, index) => `
+        <td>
+          <input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">
+        </td>
+      `).join("")}
     </tr>
   `).join("");
 
@@ -368,16 +362,11 @@ function renderHabitTracker(week) {
         ${state.habits.map((habit) => `
           <tr>
             <td class="matrix-label">${escapeHtml(habit.name)}</td>
-            ${week.map((day, index) => {
-              const scheduled = habit.days.includes(index);
-              return `
-                <td>
-                  ${scheduled
-                    ? `<input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">`
-                    : `<span class="habit-off" aria-label="${escapeHtml(habit.name)} is not mapped to ${dayNames[index]}">-</span>`}
-                </td>
-              `;
-            }).join("")}
+            ${week.map((day, index) => `
+              <td>
+                <input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">
+              </td>
+            `).join("")}
           </tr>
         `).join("")}
       </tbody>
@@ -506,7 +495,6 @@ function renderHabitMapper() {
   els.habitMapperHead.innerHTML = `
     <tr>
       <th class="task-cell">Habit</th>
-      ${dayNames.map((day) => `<th>${day}</th>`).join("")}
       <th>Actions</th>
     </tr>
   `;
@@ -516,11 +504,6 @@ function renderHabitMapper() {
       <td class="task-cell">
         <span class="task-name">${escapeHtml(habit.name)}</span>
       </td>
-      ${dayNames.map((day, index) => `
-        <td>
-          <input class="mapper-checkbox" type="checkbox" data-habit="${habit.id}" data-day-index="${index}" ${habit.days.includes(index) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${day}">
-        </td>
-      `).join("")}
       <td>
         <div class="row-actions">
           <button class="edit-button" type="button" data-edit-habit="${habit.id}" title="Edit habit" aria-label="Edit ${escapeHtml(habit.name)}">Edit</button>
@@ -528,24 +511,7 @@ function renderHabitMapper() {
         </div>
       </td>
     </tr>
-  `).join("") || `<tr><td colspan="9" class="empty-state">Add a habit definition to begin.</td></tr>`;
-
-  els.habitMapperBody.querySelectorAll(".mapper-checkbox").forEach((input) => {
-    input.addEventListener("change", () => {
-      const habit = state.habits.find((item) => item.id === input.dataset.habit);
-      const dayIndex = Number(input.dataset.dayIndex);
-      if (!habit) return;
-      if (input.checked && !habit.days.includes(dayIndex)) {
-        habit.days.push(dayIndex);
-        habit.days.sort((a, b) => a - b);
-      }
-      if (!input.checked) {
-        habit.days = habit.days.filter((day) => day !== dayIndex);
-      }
-      saveState();
-      render();
-    });
-  });
+  `).join("") || `<tr><td colspan="2" class="empty-state">Add a habit definition to begin.</td></tr>`;
 
   els.habitMapperBody.querySelectorAll("[data-edit-habit]").forEach((button) => {
     button.addEventListener("click", () => editHabit(button.dataset.editHabit));
@@ -609,12 +575,11 @@ function getHabitWeekStats(week) {
 }
 
 function getHabitDayStats(dayKey, dayIndex) {
-  const habits = state.habits.filter((habit) => habit.days.includes(dayIndex));
-  const done = habits.filter((habit) => isHabitComplete(dayKey, habit.id)).length;
+  const done = state.habits.filter((habit) => isHabitComplete(dayKey, habit.id)).length;
   return {
     done,
-    total: habits.length,
-    percent: percent(done, habits.length)
+    total: state.habits.length,
+    percent: percent(done, state.habits.length)
   };
 }
 
