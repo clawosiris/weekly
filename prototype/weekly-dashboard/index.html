@@ -35,9 +35,25 @@
       <main>
         <section class="view is-active" id="dashboardView" aria-label="Dashboard">
           <section class="summary-grid" aria-label="Weekly summary">
+            <article class="panel matrix-preview">
+              <div class="panel-heading">
+                <h2>Weekly Habits</h2>
+                <span id="habitSummaryCount">0 habits</span>
+              </div>
+              <div class="mini-matrix" id="habitMatrix"></div>
+            </article>
+
+            <article class="panel chart-panel">
+              <div class="panel-heading">
+                <h2>Habit Progress</h2>
+                <span id="habitProgressCount">0/0 completed</span>
+              </div>
+              <div class="bar-chart" id="habitProgressChart" aria-label="Habit completion by day"></div>
+            </article>
+
             <article class="panel weekly-progress">
               <div class="panel-heading">
-                <h2>Weekly Progress</h2>
+                <h2>Weekly Task Progress</h2>
                 <span id="weeklyCount">0/0 completed</span>
               </div>
               <div class="donut" id="weeklyDonut" style="--value: 0">
@@ -50,13 +66,6 @@
                 <h2>Tasks Progress</h2>
               </div>
               <div class="bar-chart" id="tasksChart" aria-label="Task completion by day"></div>
-            </article>
-
-            <article class="panel matrix-preview">
-              <div class="panel-heading">
-                <h2>Weekly Habits</h2>
-              </div>
-              <div class="mini-matrix" id="habitMatrix"></div>
             </article>
 
             <article class="panel chart-panel">
@@ -90,11 +99,14 @@
                   <option value="Personal">Personal</option>
                 </select>
               </label>
-              <fieldset>
+              <fieldset class="day-map-field">
                 <legend>Map to days</legend>
                 <div class="day-picker" id="newTaskDays"></div>
               </fieldset>
-              <button class="primary-button" type="submit">Add task</button>
+              <div class="form-actions">
+                <button class="primary-button" id="taskSubmit" type="submit">Add task</button>
+                <button class="secondary-button" id="cancelTaskEdit" type="button" hidden>Cancel</button>
+              </div>
             </form>
 
             <section class="panel mapper-panel">
@@ -106,6 +118,35 @@
                 <table class="mapper-table">
                   <thead id="mapperHead"></thead>
                   <tbody id="mapperBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="mapper-layout habit-mapper-layout">
+            <form class="panel task-form" id="habitForm">
+              <div class="panel-heading">
+                <h2>Habit Definitions</h2>
+              </div>
+              <label>
+                <span>Habit name</span>
+                <input id="habitName" name="habitName" type="text" maxlength="80" placeholder="Add a habit" required>
+              </label>
+              <div class="form-actions">
+                <button class="primary-button" id="habitSubmit" type="submit">Add habit</button>
+                <button class="secondary-button" id="cancelHabitEdit" type="button" hidden>Cancel</button>
+              </div>
+            </form>
+
+            <section class="panel mapper-panel">
+              <div class="panel-heading">
+                <h2>Habit Mapper</h2>
+                <span id="habitTotal">0 habits</span>
+              </div>
+              <div class="mapper-table-wrap habit-mapper-table-wrap">
+                <table class="mapper-table habit-mapper-table">
+                  <thead id="habitMapperHead"></thead>
+                  <tbody id="habitMapperBody"></tbody>
                 </table>
               </div>
             </section>
@@ -125,7 +166,7 @@
             <span>0%</span>
           </div>
         </header>
-        <p class="completion-copy">0/0 completed</p>
+        <p class="completion-copy">0/0 completed tasks</p>
         <ul class="checklist"></ul>
       </article>
     </template>

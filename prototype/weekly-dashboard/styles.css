@@ -115,6 +115,8 @@ h2 {
 .icon-button,
 .tab-button,
 .primary-button,
+.secondary-button,
+.edit-button,
 .delete-button {
   border: 0;
   border-radius: 8px;
@@ -262,6 +264,10 @@ h2 {
   width: 100%;
   min-height: 3px;
   background: linear-gradient(180deg, var(--sky), var(--navy));
+}
+
+.habit-bar-fill {
+  background: linear-gradient(180deg, var(--mint), #5f8f77);
 }
 
 .bar label,
@@ -432,6 +438,7 @@ h2 {
 }
 
 .checklist input,
+.habit-checkbox,
 .mapper-checkbox {
   width: 18px;
   height: 18px;
@@ -457,6 +464,10 @@ h2 {
   align-items: start;
 }
 
+.habit-mapper-layout {
+  margin-top: 14px;
+}
+
 .task-form {
   display: grid;
   gap: 14px;
@@ -480,6 +491,10 @@ h2 {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.day-map-field .day-picker {
+  margin-top: 7px;
 }
 
 .day-picker {
@@ -522,12 +537,30 @@ h2 {
   font-weight: 900;
 }
 
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.secondary-button {
+  padding: 0 14px;
+  background: #edf3f5;
+  color: var(--muted);
+  font-weight: 900;
+}
+
 .mapper-panel {
   min-width: 0;
 }
 
 .mapper-table-wrap {
   overflow-x: auto;
+}
+
+.habit-mapper-table-wrap {
+  display: flex;
+  justify-content: center;
 }
 
 .mapper-table th,
@@ -551,6 +584,39 @@ h2 {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.habit-mapper-table {
+  width: auto;
+  min-width: 0;
+}
+
+.habit-mapper-table .task-cell {
+  min-width: clamp(150px, 42vw, 240px);
+}
+
+.habit-mapper-table .actions-cell {
+  width: 128px;
+  text-align: left;
+}
+
+.habit-mapper-table .row-actions {
+  justify-content: flex-start;
+}
+
+.edit-button {
+  min-height: 36px;
+  padding: 0 10px;
+  background: #eef3ff;
+  color: var(--navy);
+  font-size: 0.76rem;
+  font-weight: 900;
 }
 
 .delete-button {
@@ -636,4 +702,9 @@ h2 {
   .mapper-table {
     min-width: 760px;
   }
+
+  .habit-mapper-table {
+    min-width: 0;
+  }
+
 }

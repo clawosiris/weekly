@@ -11,6 +11,8 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Let a user define reusable task definitions.
 - Let a user map each task to one or more days of the week.
 - Let a user check off scheduled tasks on each day.
+- Let a user define habits separately from tasks.
+- Let a user map and check off habits in a dedicated habit tracker.
 - Show daily and weekly completion aggregation.
 - Work well in a desktop browser and on a mobile phone.
 - Keep the first version simple enough to run as a local-first web app.
@@ -34,6 +36,8 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - As a user, I can choose which days a task belongs to.
 - As a user, I can remove a task definition I no longer need.
 - As a user, I can check off tasks for the current day.
+- As a user, I can add habits without mixing them into my day-card task counts.
+- As a user, I can map habits to weekdays and check them off in a separate habit tracker.
 - As a user, I can change weeks and keep separate completion state by date.
 - As a user, I can see weekly completion percentage and completed count.
 - As a user, I can see completion by day to understand where I am falling behind.
@@ -56,6 +60,12 @@ This PRD is based on the requested dashboard concept and the local prototype in 
   - completed count
   - checklist items scheduled for that day
 - Checking or unchecking a task immediately updates the dashboard and persistence layer.
+- Habit tracker section:
+  - weekly habit progress bar chart
+  - one row per habit
+  - one checkbox per mapped weekday
+  - skipped days shown as inactive
+  - habit completion stored separately from task completion
 
 ### Mapper View
 
@@ -66,9 +76,22 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Task definition list or matrix:
   - one row per task
   - one toggle per weekday
+  - edit action per task
   - delete action per task
 - Updating mapped days changes future dashboard rendering for the selected week.
+- Editing a task lets the user change its name, category, and mapped days without losing existing completion history.
 - Deleting a task removes it from the mapper and checklists.
+- Add habit form:
+  - habit name
+  - selected days
+- Habit definition list or matrix:
+  - one row per habit
+  - one toggle per weekday
+  - edit action per habit
+  - delete action per habit
+- Updating mapped habit days changes the dashboard habit tracker without changing task counts.
+- Editing a habit lets the user change its name and mapped days without losing existing habit completion history.
+- Deleting a habit removes it from the habit mapper and habit tracker.
 
 ### Aggregation
 
@@ -81,6 +104,7 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - Optional MVP visualization:
   - weekly donut or progress ring
   - daily bar chart
+  - habit progress bar chart
   - compact task-by-day matrix preview
 
 ### Persistence
@@ -99,9 +123,21 @@ This PRD is based on the requested dashboard concept and the local prototype in 
       "days": [0, 1, 2, 3, 4, 5, 6]
     }
   ],
+  "habits": [
+    {
+      "id": "habit-water",
+      "name": "Drink water",
+      "days": [0, 1, 2, 3, 4, 5, 6]
+    }
+  ],
   "completions": {
     "2026-07-20": {
       "task-water": true
+    }
+  },
+  "habitCompletions": {
+    "2026-07-20": {
+      "habit-water": true
     }
   }
 }
@@ -112,29 +148,45 @@ This PRD is based on the requested dashboard concept and the local prototype in 
 - The app must normalize the selected week to Monday as the start of week.
 - The app must support all seven days of the week.
 - A task can be mapped to zero, one, or multiple days.
+- A habit can be mapped to zero, one, or multiple days.
 - If a newly created task has no selected days, the app should either:
+  - default it to all seven days, or
+  - require at least one selected day before submit.
+- If a newly created habit has no selected days, the app should either:
   - default it to all seven days, or
   - require at least one selected day before submit.
 - Task names must be required and trimmed.
 - Task names should support at least 80 characters.
+- Habit names must be required and trimmed.
+- Habit names should support at least 80 characters.
 - Delete actions must remove old completion records for the deleted task.
+- Edit actions must preserve the existing task ID and completion records.
+- Habit delete actions must remove old completion records for the deleted habit.
+- Habit edit actions must preserve the existing habit ID and completion records.
 - Completion state must be date-specific, not only weekday-specific.
-- The dashboard must update immediately after task, mapping, or completion changes.
+- Task and habit completion state must be stored separately.
+- The dashboard must update immediately after task, habit, mapping, or completion changes.
 - The mobile layout must preserve the same core actions:
   - navigate weeks
   - switch views
   - check off daily tasks
+  - check off habits
   - add tasks
+  - add habits
+  - edit task names and categories
+  - edit habit names
   - edit mapped days
   - delete tasks
+  - delete habits
 
 ## UX Requirements
 
 - The dashboard should feel like a practical planner, not a marketing page.
 - Desktop should prioritize scanability:
   - summary metrics at top
+  - habit tracker as its own dashboard section
   - day cards below
-  - mapper matrix for efficient editing
+  - separate task and habit mapper matrices for efficient editing
 - Mobile should prioritize completion:
   - week controls first
   - summary second
@@ -144,6 +196,8 @@ This PRD is based on the requested dashboard concept and the local prototype in 
   - icon buttons for week navigation
   - tabs for Dashboard and Mapper
   - checkboxes or toggles for mapped days
+  - edit button/action for task name and category changes
+  - edit button/action for habit name changes
   - delete icon/button for task removal
 - Empty states should be clear:
   - no tasks yet
@@ -215,10 +269,21 @@ See `ui-sketch.html` for a standalone visual wireframe.
 - `category`: optional grouping label.
 - `days`: weekday indexes where Monday is `0` and Sunday is `6`.
 
+### Habit
+
+- `id`: stable string identifier.
+- `name`: user-visible habit title.
+- `days`: weekday indexes where Monday is `0` and Sunday is `6`.
+
 ### Completion
 
 - Keyed by ISO date string.
 - Contains task IDs completed on that date.
+
+### Habit Completion
+
+- Keyed by ISO date string.
+- Contains habit IDs completed on that date.
 
 ### Derived Metrics
 
@@ -226,14 +291,23 @@ See `ui-sketch.html` for a standalone visual wireframe.
 - `dayDone = scheduledTasksForDay completed for ISO date`
 - `dayPercent = dayDone / scheduledTasksForDay.length`
 - `weekPercent = sum(dayDone) / sum(scheduledTasksForDay.length)`
+- `scheduledHabitsForDay = habits where habit.days includes weekdayIndex`
+- `habitDayDone = scheduledHabitsForDay completed for ISO date`
+- `habitDayPercent = habitDayDone / scheduledHabitsForDay.length`
 
 ## Acceptance Criteria
 
 - A user can add a task and immediately see it in the mapper.
 - A user can map that task to selected days and immediately see it on those day cards.
+- A user can edit an existing task's name, category, and mapped days without losing previous checkoffs.
 - A user can check off a mapped task and see day and week completion update.
 - A user can delete a task and no longer see it in any day checklist or mapper row.
-- Refreshing the browser preserves tasks, mapped days, selected week, and completions.
+- A user can add a habit and immediately see it in the habit mapper and dashboard habit tracker.
+- A user can map that habit to selected days without changing task counts.
+- A user can edit an existing habit's name and mapped days without losing previous habit checkoffs.
+- A user can check off a mapped habit and preserve that habit state by date.
+- A user can delete a habit and no longer see it in the habit mapper or habit tracker.
+- Refreshing the browser preserves tasks, habits, mapped days, selected week, and completions.
 - Switching to a different week shows completion state for that specific week.
 - The app is usable at desktop width and at phone width.
 - The UI sketch is original and not a copy of the supplied reference image.

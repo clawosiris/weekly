@@ -14,7 +14,16 @@ const defaultTasks = [
   { id: "task-reflect", name: "Evening reflection", category: "Personal", days: [0, 1, 2, 3, 4, 5, 6] }
 ];
 
+const defaultHabits = [
+  { id: "habit-water", name: "Drink water" },
+  { id: "habit-language", name: "Do language" },
+  { id: "habit-reading", name: "Read for 15 minutes" },
+  { id: "habit-stretch", name: "Stretch" }
+];
+
 let state = loadState();
+let editingTaskId = null;
+let editingHabitId = null;
 
 const els = {
   weekStart: document.querySelector("#weekStart"),
@@ -25,21 +34,33 @@ const els = {
   weeklyCount: document.querySelector("#weeklyCount"),
   tasksChart: document.querySelector("#tasksChart"),
   habitMatrix: document.querySelector("#habitMatrix"),
+  habitSummaryCount: document.querySelector("#habitSummaryCount"),
+  habitProgressChart: document.querySelector("#habitProgressChart"),
+  habitProgressCount: document.querySelector("#habitProgressCount"),
   dailyBars: document.querySelector("#dailyBars"),
   daysGrid: document.querySelector("#daysGrid"),
   taskForm: document.querySelector("#taskForm"),
   taskName: document.querySelector("#taskName"),
   taskCategory: document.querySelector("#taskCategory"),
+  taskSubmit: document.querySelector("#taskSubmit"),
+  cancelTaskEdit: document.querySelector("#cancelTaskEdit"),
   newTaskDays: document.querySelector("#newTaskDays"),
+  habitForm: document.querySelector("#habitForm"),
+  habitName: document.querySelector("#habitName"),
+  habitSubmit: document.querySelector("#habitSubmit"),
+  cancelHabitEdit: document.querySelector("#cancelHabitEdit"),
   mapperHead: document.querySelector("#mapperHead"),
   mapperBody: document.querySelector("#mapperBody"),
-  taskTotal: document.querySelector("#taskTotal")
+  taskTotal: document.querySelector("#taskTotal"),
+  habitMapperHead: document.querySelector("#habitMapperHead"),
+  habitMapperBody: document.querySelector("#habitMapperBody"),
+  habitTotal: document.querySelector("#habitTotal")
 };
 
 init();
 
 function init() {
-  renderDayPicker();
+  renderDayPicker(els.newTaskDays);
   bindEvents();
   normalizeWeekInput();
   render();
@@ -53,7 +74,9 @@ function loadState() {
       return {
         weekStart: parsed.weekStart || toDateInput(startOfWeek(new Date())),
         tasks: Array.isArray(parsed.tasks) ? parsed.tasks : defaultTasks,
-        completions: parsed.completions && typeof parsed.completions === "object" ? parsed.completions : {}
+        habits: Array.isArray(parsed.habits) ? normalizeHabits(parsed.habits) : defaultHabits,
+        completions: parsed.completions && typeof parsed.completions === "object" ? parsed.completions : {},
+        habitCompletions: parsed.habitCompletions && typeof parsed.habitCompletions === "object" ? parsed.habitCompletions : {}
       };
     } catch {
       localStorage.removeItem(STORAGE_KEY);
@@ -63,12 +86,23 @@ function loadState() {
   return {
     weekStart: toDateInput(startOfWeek(new Date())),
     tasks: defaultTasks,
-    completions: {}
+    habits: defaultHabits,
+    completions: {},
+    habitCompletions: {}
   };
 }
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function normalizeHabits(habits) {
+  return habits
+    .filter((habit) => habit && typeof habit.id === "string" && typeof habit.name === "string")
+    .map((habit) => ({
+      id: habit.id,
+      name: habit.name
+    }));
 }
 
 function bindEvents() {
@@ -96,36 +130,81 @@ function bindEvents() {
     if (!name) return;
 
     const days = [...els.newTaskDays.querySelectorAll("input:checked")].map((input) => Number(input.value));
-    state.tasks.push({
-      id: `task-${Date.now().toString(36)}`,
+    const nextTask = {
       name,
       category: els.taskCategory.value,
       days: days.length ? days : [0, 1, 2, 3, 4, 5, 6]
-    });
-    els.taskForm.reset();
-    els.newTaskDays.querySelectorAll("input").forEach((input) => {
-      input.checked = true;
-    });
+    };
+
+    if (editingTaskId) {
+      const task = state.tasks.find((item) => item.id === editingTaskId);
+      if (task) {
+        Object.assign(task, nextTask);
+      }
+    } else {
+      state.tasks.push({
+        id: `task-${Date.now().toString(36)}`,
+        ...nextTask
+      });
+    }
+
+    resetTaskForm();
     saveState();
     render();
   });
+
+  els.cancelTaskEdit.addEventListener("click", resetTaskForm);
+
+  els.habitForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = els.habitName.value.trim();
+    if (!name) return;
+
+    const nextHabit = {
+      name
+    };
+
+    if (editingHabitId) {
+      const habit = state.habits.find((item) => item.id === editingHabitId);
+      if (habit) {
+        Object.assign(habit, nextHabit);
+      }
+    } else {
+      state.habits.push({
+        id: `habit-${Date.now().toString(36)}`,
+        ...nextHabit
+      });
+    }
+
+    resetHabitForm();
+    saveState();
+    render();
+  });
+
+  els.cancelHabitEdit.addEventListener("click", resetHabitForm);
 }
 
 function render() {
   normalizeWeekInput();
   const week = getWeekDays();
   const stats = getWeekStats(week);
+  const habitStats = getHabitWeekStats(week);
 
   els.weeklyCount.textContent = `${stats.done}/${stats.total} completed`;
   els.weeklyPercent.textContent = `${stats.percent}%`;
   els.weeklyDonut.style.setProperty("--value", stats.percent);
+  els.habitProgressCount.textContent = `${habitStats.done}/${habitStats.total} completed`;
   els.taskTotal.textContent = `${state.tasks.length} ${state.tasks.length === 1 ? "task" : "tasks"}`;
+  els.habitTotal.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
+  els.habitSummaryCount.textContent = `${state.habits.length} ${state.habits.length === 1 ? "habit" : "habits"}`;
 
   renderTasksChart(week);
+  renderHabitProgressChart(week);
   renderDailyBars(week);
   renderHabitMatrix(week);
   renderDayCards(week);
   renderMapper();
+  renderHabitMapper();
 }
 
 function normalizeWeekInput() {
@@ -133,13 +212,62 @@ function normalizeWeekInput() {
   els.weekStart.value = state.weekStart;
 }
 
-function renderDayPicker() {
-  els.newTaskDays.innerHTML = dayNames.map((day, index) => `
+function renderDayPicker(container) {
+  container.innerHTML = dayNames.map((day, index) => `
     <label class="day-pill">
       <input type="checkbox" value="${index}" checked>
       <span>${day}</span>
     </label>
   `).join("");
+}
+
+function resetTaskForm() {
+  editingTaskId = null;
+  els.taskForm.reset();
+  els.taskName.placeholder = "Add a task";
+  els.taskSubmit.textContent = "Add task";
+  els.cancelTaskEdit.hidden = true;
+  els.newTaskDays.querySelectorAll("input").forEach((input) => {
+    input.checked = true;
+  });
+}
+
+function resetHabitForm() {
+  editingHabitId = null;
+  els.habitForm.reset();
+  els.habitName.placeholder = "Add a habit";
+  els.habitSubmit.textContent = "Add habit";
+  els.cancelHabitEdit.hidden = true;
+}
+
+function editTask(taskId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  if (!task) return;
+
+  editingTaskId = task.id;
+  els.taskName.value = task.name;
+  els.taskName.placeholder = "Edit task";
+  els.taskCategory.value = task.category;
+  els.newTaskDays.querySelectorAll("input").forEach((input) => {
+    input.checked = task.days.includes(Number(input.value));
+  });
+  els.taskSubmit.textContent = "Save task";
+  els.cancelTaskEdit.hidden = false;
+  els.taskForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  els.taskName.focus();
+}
+
+function editHabit(habitId) {
+  const habit = state.habits.find((item) => item.id === habitId);
+  if (!habit) return;
+
+  editingHabitId = habit.id;
+  els.habitName.value = habit.name;
+  els.habitName.placeholder = "Edit habit";
+  els.habitSubmit.textContent = "Save habit";
+  els.cancelHabitEdit.hidden = false;
+  els.habitForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  els.habitName.focus();
 }
 
 function renderTasksChart(week) {
@@ -149,6 +277,20 @@ function renderTasksChart(week) {
       <div class="bar">
         <div class="bar-stack" title="${dayStats.percent}% complete">
           <div class="bar-fill" style="height: ${dayStats.percent}%"></div>
+        </div>
+        <label>${dayNames[index]}</label>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderHabitProgressChart(week) {
+  els.habitProgressChart.innerHTML = week.map((day, index) => {
+    const dayStats = getHabitDayStats(day.key, index);
+    return `
+      <div class="bar">
+        <div class="bar-stack" title="${dayStats.done}/${dayStats.total} habits complete">
+          <div class="bar-fill habit-bar-fill" style="height: ${dayStats.percent}%"></div>
         </div>
         <label>${dayNames[index]}</label>
       </div>
@@ -172,14 +314,14 @@ function renderDailyBars(week) {
 }
 
 function renderHabitMatrix(week) {
-  const rows = state.tasks.slice(0, 8).map((task) => `
+  const rows = state.habits.slice(0, 8).map((habit) => `
     <tr>
-      <td class="matrix-label">${escapeHtml(task.name)}</td>
-      ${week.map((day, index) => {
-        const scheduled = task.days.includes(index);
-        const done = scheduled && isComplete(day.key, task.id);
-        return `<td><span class="checkmark ${done ? "is-on" : ""}">${done ? "✓" : ""}</span></td>`;
-      }).join("")}
+      <td class="matrix-label">${escapeHtml(habit.name)}</td>
+      ${week.map((day, index) => `
+        <td>
+          <input class="habit-checkbox" type="checkbox" data-day="${day.key}" data-habit="${habit.id}" ${isHabitComplete(day.key, habit.id) ? "checked" : ""} aria-label="${escapeHtml(habit.name)} on ${dayNames[index]}">
+        </td>
+      `).join("")}
     </tr>
   `).join("");
 
@@ -187,13 +329,24 @@ function renderHabitMatrix(week) {
     <table>
       <thead>
         <tr>
-          <th>Tasks</th>
+          <th>Habits</th>
           ${dayNames.map((day) => `<th>${day}</th>`).join("")}
         </tr>
       </thead>
-      <tbody>${rows || `<tr><td colspan="8" class="empty-state">No tasks yet.</td></tr>`}</tbody>
+      <tbody>${rows || `<tr><td colspan="8" class="empty-state">No habits yet.</td></tr>`}</tbody>
     </table>
   `;
+
+  bindHabitCompletionInputs(els.habitMatrix);
+}
+
+function bindHabitCompletionInputs(container) {
+  container.querySelectorAll(".habit-checkbox").forEach((input) => {
+    input.addEventListener("change", () => {
+      setHabitCompletion(input.dataset.day, input.dataset.habit, input.checked);
+      render();
+    });
+  });
 }
 
 function renderDayCards(week) {
@@ -209,7 +362,7 @@ function renderDayCards(week) {
     card.querySelector(".day-date").textContent = formatShortDate(day.date);
     card.querySelector(".small-donut").style.setProperty("--value", stats.percent);
     card.querySelector(".small-donut span").textContent = `${stats.percent}%`;
-    card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed`;
+    card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed tasks`;
 
     const checklist = card.querySelector(".checklist");
     if (!scheduledTasks.length) {
@@ -241,7 +394,7 @@ function renderMapper() {
     <tr>
       <th class="task-cell">Task</th>
       ${dayNames.map((day) => `<th>${day}</th>`).join("")}
-      <th>Delete</th>
+      <th>Actions</th>
     </tr>
   `;
 
@@ -257,7 +410,10 @@ function renderMapper() {
         </td>
       `).join("")}
       <td>
-        <button class="delete-button" type="button" data-delete="${task.id}" title="Delete task" aria-label="Delete ${escapeHtml(task.name)}">×</button>
+        <div class="row-actions">
+          <button class="edit-button" type="button" data-edit="${task.id}" title="Edit task" aria-label="Edit ${escapeHtml(task.name)}">Edit</button>
+          <button class="delete-button" type="button" data-delete="${task.id}" title="Delete task" aria-label="Delete ${escapeHtml(task.name)}">×</button>
+        </div>
       </td>
     </tr>
   `).join("") || `<tr><td colspan="9" class="empty-state">Add a task definition to begin.</td></tr>`;
@@ -279,6 +435,10 @@ function renderMapper() {
     });
   });
 
+  els.mapperBody.querySelectorAll("[data-edit]").forEach((button) => {
+    button.addEventListener("click", () => editTask(button.dataset.edit));
+  });
+
   els.mapperBody.querySelectorAll("[data-delete]").forEach((button) => {
     button.addEventListener("click", () => {
       const taskId = button.dataset.delete;
@@ -286,6 +446,51 @@ function renderMapper() {
       Object.keys(state.completions).forEach((dayKey) => {
         delete state.completions[dayKey][taskId];
       });
+      if (editingTaskId === taskId) {
+        resetTaskForm();
+      }
+      saveState();
+      render();
+    });
+  });
+}
+
+function renderHabitMapper() {
+  els.habitMapperHead.innerHTML = `
+    <tr>
+      <th class="task-cell">Habit</th>
+      <th class="actions-cell">Actions</th>
+    </tr>
+  `;
+
+  els.habitMapperBody.innerHTML = state.habits.map((habit) => `
+    <tr>
+      <td class="task-cell">
+        <span class="task-name">${escapeHtml(habit.name)}</span>
+      </td>
+      <td class="actions-cell">
+        <div class="row-actions">
+          <button class="edit-button" type="button" data-edit-habit="${habit.id}" title="Edit habit" aria-label="Edit ${escapeHtml(habit.name)}">Edit</button>
+          <button class="delete-button" type="button" data-delete-habit="${habit.id}" title="Delete habit" aria-label="Delete ${escapeHtml(habit.name)}">×</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="2" class="empty-state">Add a habit definition to begin.</td></tr>`;
+
+  els.habitMapperBody.querySelectorAll("[data-edit-habit]").forEach((button) => {
+    button.addEventListener("click", () => editHabit(button.dataset.editHabit));
+  });
+
+  els.habitMapperBody.querySelectorAll("[data-delete-habit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const habitId = button.dataset.deleteHabit;
+      state.habits = state.habits.filter((habit) => habit.id !== habitId);
+      Object.keys(state.habitCompletions).forEach((dayKey) => {
+        delete state.habitCompletions[dayKey][habitId];
+      });
+      if (editingHabitId === habitId) {
+        resetHabitForm();
+      }
       saveState();
       render();
     });
@@ -323,6 +528,25 @@ function getDayStats(dayKey, dayIndex) {
   };
 }
 
+function getHabitWeekStats(week) {
+  return week.reduce((acc, day, index) => {
+    const dayStats = getHabitDayStats(day.key, index);
+    acc.done += dayStats.done;
+    acc.total += dayStats.total;
+    acc.percent = percent(acc.done, acc.total);
+    return acc;
+  }, { done: 0, total: 0, percent: 0 });
+}
+
+function getHabitDayStats(dayKey, dayIndex) {
+  const done = state.habits.filter((habit) => isHabitComplete(dayKey, habit.id)).length;
+  return {
+    done,
+    total: state.habits.length,
+    percent: percent(done, state.habits.length)
+  };
+}
+
 function setCompletion(dayKey, taskId, done) {
   state.completions[dayKey] = state.completions[dayKey] || {};
   if (done) {
@@ -335,6 +559,20 @@ function setCompletion(dayKey, taskId, done) {
 
 function isComplete(dayKey, taskId) {
   return Boolean(state.completions[dayKey] && state.completions[dayKey][taskId]);
+}
+
+function setHabitCompletion(dayKey, habitId, done) {
+  state.habitCompletions[dayKey] = state.habitCompletions[dayKey] || {};
+  if (done) {
+    state.habitCompletions[dayKey][habitId] = true;
+  } else {
+    delete state.habitCompletions[dayKey][habitId];
+  }
+  saveState();
+}
+
+function isHabitComplete(dayKey, habitId) {
+  return Boolean(state.habitCompletions[dayKey] && state.habitCompletions[dayKey][habitId]);
 }
 
 function moveWeek(days) {
