@@ -459,7 +459,7 @@ function renderHabitMapper() {
   els.habitMapperHead.innerHTML = `
     <tr>
       <th class="task-cell">Habit</th>
-      <th>Actions</th>
+      <th class="actions-cell">Actions</th>
     </tr>
   `;
 
@@ -468,7 +468,7 @@ function renderHabitMapper() {
       <td class="task-cell">
         <span class="task-name">${escapeHtml(habit.name)}</span>
       </td>
-      <td>
+      <td class="actions-cell">
         <div class="row-actions">
           <button class="edit-button" type="button" data-edit-habit="${habit.id}" title="Edit habit" aria-label="Edit ${escapeHtml(habit.name)}">Edit</button>
           <button class="delete-button" type="button" data-delete-habit="${habit.id}" title="Delete habit" aria-label="Delete ${escapeHtml(habit.name)}">×</button>
