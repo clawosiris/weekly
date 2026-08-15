@@ -3,16 +3,33 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Weekly Planner Dashboard</title>
+    <meta name="theme-color" content="#526b55">
+    <title>Weekly</title>
+    <link rel="icon" id="appIcon" href="icons/whooping-crane.svg">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <section class="mascot-splash" id="mascotSplash" aria-label="Animal of the week">
+      <button class="splash-skip" id="skipSplash" type="button">Enter Weekly →</button>
+      <div class="splash-copy">
+        <p class="splash-kicker">Weekly mascot</p>
+        <h1 id="splashName">Whooping Crane</h1>
+        <div class="conservation-line"><span id="splashStatus">Endangered</span><span id="splashPopulation">About 830 remain</span></div>
+      </div>
+      <div class="walking-stage"><div class="walking-animal" id="walkingAnimal">🪿</div><div class="ground-line"></div></div>
+      <p class="splash-fact" id="splashFact"></p>
+    </section>
     <div class="app-shell">
       <header class="topbar">
         <div>
           <p class="eyebrow">Weekly planner</p>
           <h1>Checklist Dashboard</h1>
         </div>
+        <button class="mascot-chip" id="mascotChip" type="button" aria-label="Open this week's mascot">
+          <img id="mascotChipIcon" src="icons/whooping-crane.svg" alt="">
+          <span><small>This week</small><strong id="mascotChipName">Whooping Crane</strong></span>
+        </button>
         <div class="topbar-actions" aria-label="Week controls">
           <button class="icon-button" id="previousWeek" type="button" title="Previous week" aria-label="Previous week">
             <span aria-hidden="true">‹</span>
@@ -30,10 +47,16 @@
       <nav class="tabs" aria-label="Planner views">
         <button class="tab-button is-active" data-view="dashboard" type="button">Dashboard</button>
         <button class="tab-button" data-view="mapper" type="button">Mapper</button>
+        <button class="tab-button" data-view="reminders" type="button">Reminders</button>
       </nav>
 
       <main>
         <section class="view is-active" id="dashboardView" aria-label="Dashboard">
+          <article class="mascot-banner" id="mascotBanner">
+            <img id="mascotBannerIcon" src="icons/whooping-crane.svg" alt="">
+            <div><p class="eyebrow">Your weekly guide</p><h2 id="mascotBannerName">Whooping Crane</h2><p id="mascotBannerFact"></p></div>
+            <div class="mascot-stat"><span id="mascotBannerStatus">Endangered</span><strong id="mascotBannerPopulation">~830</strong><small>estimated remaining</small></div>
+          </article>
           <section class="summary-grid" aria-label="Weekly summary">
             <article class="panel weekly-progress">
               <div class="panel-heading">
@@ -94,6 +117,10 @@
                 <legend>Map to days</legend>
                 <div class="day-picker" id="newTaskDays"></div>
               </fieldset>
+              <label>
+                <span>Reminder time (optional)</span>
+                <input id="taskReminder" name="taskReminder" type="time">
+              </label>
               <button class="primary-button" type="submit">Add task</button>
             </form>
 
@@ -111,8 +138,24 @@
             </section>
           </section>
         </section>
+
+        <section class="view" id="remindersView" aria-label="Task reminders">
+          <section class="reminder-layout">
+            <article class="panel notification-card">
+              <img id="notificationMascot" src="icons/whooping-crane.svg" alt="">
+              <div><p class="eyebrow">Mascot check-ins</p><h2>Let your W-animal nudge you</h2><p>Weekly can notify you at the times you choose. Web reminders work while Weekly is open or recently active.</p></div>
+              <div class="notification-action"><button class="primary-button" id="enableNotifications" type="button">Enable notifications</button><small id="notificationStatus">Permission not requested</small></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><h2>Reminder schedule</h2><span>Set each task</span></div>
+              <div class="reminder-list" id="reminderList"></div>
+            </article>
+          </section>
+        </section>
       </main>
     </div>
+
+    <div class="mascot-toast" id="mascotToast" role="status"><img id="toastIcon" src="icons/whooping-crane.svg" alt=""><div><strong id="toastTitle"></strong><span id="toastBody"></span></div></div>
 
     <template id="dayCardTemplate">
       <article class="day-card">
