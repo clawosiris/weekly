@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#526b55">
+    <title>Weekly</title>
+    <link rel="icon" id="appIcon" href="icons/whooping-crane.svg">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <section class="mascot-splash" id="mascotSplash" aria-label="Animal of the week">
+      <button class="splash-skip" id="skipSplash" type="button">Enter Weekly →</button>
+      <div class="splash-copy">
+        <p class="splash-kicker">Weekly mascot</p>
+        <h1 id="splashName">Whooping Crane</h1>
+        <div class="conservation-line"><span id="splashStatus">Endangered</span><span id="splashPopulation">About 830 remain</span></div>
+      </div>
+      <div class="walking-stage"><div class="walking-animal" id="walkingAnimal">🪿</div><div class="ground-line"></div></div>
+      <p class="splash-fact" id="splashFact"></p>
+    </section>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Weekly planner</p>
+          <h1>Checklist Dashboard</h1>
+        </div>
+        <button class="mascot-chip" id="mascotChip" type="button" aria-label="Open this week's mascot">
+          <img id="mascotChipIcon" src="icons/whooping-crane.svg" alt="">
+          <span><small>This week</small><strong id="mascotChipName">Whooping Crane</strong></span>
+        </button>
+        <div class="topbar-actions" aria-label="Week controls">
+          <button class="icon-button" id="previousWeek" type="button" title="Previous week" aria-label="Previous week">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <label class="date-field">
+            <span>Week of</span>
+            <input id="weekStart" type="date">
+          </label>
+          <button class="icon-button" id="nextWeek" type="button" title="Next week" aria-label="Next week">
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Planner views">
+        <button class="tab-button is-active" data-view="dashboard" type="button">Dashboard</button>
+        <button class="tab-button" data-view="mapper" type="button">Mapper</button>
+        <button class="tab-button" data-view="reminders" type="button">Reminders</button>
+      </nav>
+
+      <main>
+        <section class="view is-active" id="dashboardView" aria-label="Dashboard">
+          <article class="mascot-banner" id="mascotBanner">
+            <img id="mascotBannerIcon" src="icons/whooping-crane.svg" alt="">
+            <div><p class="eyebrow">Your weekly guide</p><h2 id="mascotBannerName">Whooping Crane</h2><p id="mascotBannerFact"></p></div>
+            <div class="mascot-stat"><span id="mascotBannerStatus">Endangered</span><strong id="mascotBannerPopulation">~830</strong><small>estimated remaining</small></div>
+          </article>
+          <section class="summary-grid" aria-label="Weekly summary">
+            <article class="panel weekly-progress">
+              <div class="panel-heading">
+                <h2>Weekly Progress</h2>
+                <span id="weeklyCount">0/0 completed</span>
+              </div>
+              <div class="donut" id="weeklyDonut" style="--value: 0">
+                <span id="weeklyPercent">0%</span>
+              </div>
+            </article>
+
+            <article class="panel chart-panel">
+              <div class="panel-heading">
+                <h2>Tasks Progress</h2>
+              </div>
+              <div class="bar-chart" id="tasksChart" aria-label="Task completion by day"></div>
+            </article>
+
+            <article class="panel matrix-preview">
+              <div class="panel-heading">
+                <h2>Weekly Habits</h2>
+              </div>
+              <div class="mini-matrix" id="habitMatrix"></div>
+            </article>
+
+            <article class="panel chart-panel">
+              <div class="panel-heading">
+                <h2>Daily Completion</h2>
+              </div>
+              <div class="horizontal-bars" id="dailyBars" aria-label="Daily completion percentages"></div>
+            </article>
+          </section>
+
+          <section class="days-grid" id="daysGrid" aria-label="Daily checklists"></section>
+        </section>
+
+        <section class="view" id="mapperView" aria-label="Task mapper">
+          <section class="mapper-layout">
+            <form class="panel task-form" id="taskForm">
+              <div class="panel-heading">
+                <h2>Task Definitions</h2>
+              </div>
+              <label>
+                <span>Task name</span>
+                <input id="taskName" name="taskName" type="text" maxlength="80" placeholder="Add a task" required>
+              </label>
+              <label>
+                <span>Category</span>
+                <select id="taskCategory" name="taskCategory">
+                  <option value="Health">Health</option>
+                  <option value="Home">Home</option>
+                  <option value="Work">Work</option>
+                  <option value="Learning">Learning</option>
+                  <option value="Personal">Personal</option>
+                </select>
+              </label>
+              <fieldset>
+                <legend>Map to days</legend>
+                <div class="day-picker" id="newTaskDays"></div>
+              </fieldset>
+              <label>
+                <span>Reminder time (optional)</span>
+                <input id="taskReminder" name="taskReminder" type="time">
+              </label>
+              <button class="primary-button" type="submit">Add task</button>
+            </form>
+
+            <section class="panel mapper-panel">
+              <div class="panel-heading">
+                <h2>Weekly Mapper</h2>
+                <span id="taskTotal">0 tasks</span>
+              </div>
+              <div class="mapper-table-wrap">
+                <table class="mapper-table">
+                  <thead id="mapperHead"></thead>
+                  <tbody id="mapperBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <section class="view" id="remindersView" aria-label="Task reminders">
+          <section class="reminder-layout">
+            <article class="panel notification-card">
+              <img id="notificationMascot" src="icons/whooping-crane.svg" alt="">
+              <div><p class="eyebrow">Mascot check-ins</p><h2>Let your W-animal nudge you</h2><p>Weekly can notify you at the times you choose. Web reminders work while Weekly is open or recently active.</p></div>
+              <div class="notification-action"><button class="primary-button" id="enableNotifications" type="button">Enable notifications</button><small id="notificationStatus">Permission not requested</small></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><h2>Reminder schedule</h2><span>Set each task</span></div>
+              <div class="reminder-list" id="reminderList"></div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="mascot-toast" id="mascotToast" role="status"><img id="toastIcon" src="icons/whooping-crane.svg" alt=""><div><strong id="toastTitle"></strong><span id="toastBody"></span></div></div>
+
+    <template id="dayCardTemplate">
+      <article class="day-card">
+        <header>
+          <div>
+            <p class="day-name"></p>
+            <h2 class="day-date"></h2>
+          </div>
+          <div class="small-donut" style="--value: 0">
+            <span>0%</span>
+          </div>
+        </header>
+        <p class="completion-copy">0/0 completed</p>
+        <ul class="checklist"></ul>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
