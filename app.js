@@ -48,6 +48,8 @@ const els = {
   reminderList: document.querySelector("#reminderList"),
   enableNotifications: document.querySelector("#enableNotifications"),
   notificationStatus: document.querySelector("#notificationStatus"),
+  confirmReminders: document.querySelector("#confirmReminders"),
+  reminderConfirmStatus: document.querySelector("#reminderConfirmStatus"),
   mascotSplash: document.querySelector("#mascotSplash"),
   skipSplash: document.querySelector("#skipSplash"),
   mascotChip: document.querySelector("#mascotChip"),
@@ -98,6 +100,7 @@ function bindEvents() {
   els.skipSplash.addEventListener("click", closeSplash);
   els.mascotChip.addEventListener("click", openSplash);
   els.enableNotifications.addEventListener("click", enableNotifications);
+  els.confirmReminders.addEventListener("click", confirmReminders);
   els.weekStart.addEventListener("change", () => {
     state.weekStart = toDateInput(startOfWeek(new Date(`${els.weekStart.value}T00:00:00`)));
     saveState();
@@ -434,7 +437,54 @@ async function enableNotifications() {
   els.notificationStatus.textContent = notificationPermissionLabel();
   if (permission === "granted") {
     showMascotToast("Notifications are on", `${currentMascot.name} will remind you at the times you choose.`);
+    await sendBrowserNotification("Weekly notifications are on", `${currentMascot.name} is ready to remind you.` , "weekly-permission-test");
   }
+}
+
+async function confirmReminders() {
+  const rows = [...els.reminderList.querySelectorAll(".reminder-row")];
+  rows.forEach((row) => {
+    const enabledInput = row.querySelector("[data-reminder-enabled]");
+    const timeInput = row.querySelector("[data-reminder-time]");
+    const task = state.tasks.find((item) => item.id === timeInput?.dataset.reminderTime);
+    if (!task) return;
+    task.reminder = timeInput.value;
+    task.reminderEnabled = Boolean(enabledInput.checked && timeInput.value);
+  });
+  saveState();
+  renderReminders();
+
+  if (!("Notification" in window)) {
+    setReminderStatus("This browser does not support notifications.", true);
+    return;
+  }
+
+  let permission = Notification.permission;
+  if (permission === "default") permission = await Notification.requestPermission();
+  els.notificationStatus.textContent = notificationPermissionLabel();
+
+  if (permission !== "granted") {
+    setReminderStatus("Notifications are blocked. Open Chrome settings → Site settings → Notifications → allow Weekly.", true);
+    return;
+  }
+
+  const enabledCount = state.tasks.filter((task) => task.reminderEnabled && task.reminder).length;
+  if (!enabledCount) {
+    setReminderStatus("Saved, but no reminders are switched on with a time selected.", true);
+    return;
+  }
+
+  const worked = await sendBrowserNotification(
+    `${currentMascot.emoji} Reminders confirmed`,
+    `${currentMascot.name} will watch ${enabledCount} ${enabledCount === 1 ? "reminder" : "reminders"}. Keep Weekly open for scheduled web reminders.`,
+    `weekly-confirm-${Date.now()}`
+  );
+  setReminderStatus(worked ? `Saved ${enabledCount} ${enabledCount === 1 ? "reminder" : "reminders"}. A test notification was sent.` : "Saved, but Android did not accept the test notification. Check Weekly's notification permission.", !worked);
+}
+
+function setReminderStatus(message, isError = false) {
+  els.reminderConfirmStatus.textContent = message;
+  els.reminderConfirmStatus.classList.toggle("is-error", isError);
 }
 
 function notificationPermissionLabel() {
@@ -443,7 +493,7 @@ function notificationPermissionLabel() {
   return "Permission not requested";
 }
 
-function checkReminders() {
+async function checkReminders() {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   const now = new Date();
   const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
@@ -458,9 +508,25 @@ function checkReminders() {
       sentReminders.add(key);
       const icon = currentMascot.id === "whale-shark" ? "icons/whale-shark-mascot.png" : `icons/${currentMascot.id}.svg`;
       const body = `${currentMascot.name} says: time for ${task.name}. ${currentMascot.status} · ${currentMascot.population} estimated.`;
-      new Notification(`${currentMascot.emoji} Weekly reminder`, { body, icon, badge: icon, tag: key });
+      sendBrowserNotification(`${currentMascot.emoji} Weekly reminder`, body, key, icon);
       showMascotToast("Task reminder", body);
     });
+}
+
+async function sendBrowserNotification(title, body, tag, customIcon = null) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return false;
+  const icon = customIcon || (currentMascot.id === "whale-shark" ? "icons/whale-shark-mascot.png" : `icons/${currentMascot.id}.svg`);
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, { body, icon, badge: icon, tag });
+    } else {
+      new Notification(title, { body, icon, tag });
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function showMascotToast(title, body) {
