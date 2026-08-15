@@ -1,8 +1,8 @@
-const CACHE_NAME = "weekly-wildlife-v3";
+const CACHE_NAME = "weekly-wildlife-v4";
 const APP_FILES = [
   "./", "index.html", "styles.css", "app.js", "manifest.webmanifest",
   "icons/whooping-crane.svg", "icons/african-wild-dog.svg", "icons/white-rhino.svg",
-  "icons/whale-shark.svg", "icons/whale-shark-mascot.png", "icons/woylie.svg"
+  "icons/whale-shark.svg", "icons/whale-shark-mascot.png", "icons/whale-shark-app-icon.png", "icons/woylie.svg"
 ];
 
 self.addEventListener("install", (event) => {
