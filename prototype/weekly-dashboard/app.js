@@ -394,7 +394,7 @@ function applyMascot() {
 
   setText("splashName", currentMascot.name);
   setText("splashStatus", currentMascot.status);
-  setText("splashPopulation", currentMascot.detail);
+  setText("splashPopulation", `${currentMascot.population} ${currentMascot.detail.toLowerCase()}`);
   setText("splashFact", currentMascot.fact);
   const walkingAnimal = document.querySelector("#walkingAnimal");
   walkingAnimal.classList.toggle("is-swimming", isWhaleShark);
