@@ -380,7 +380,12 @@ function getWeeklyMascot() {
 
 function applyMascot() {
   const isWhaleShark = currentMascot.id === "whale-shark";
-  const icon = isWhaleShark ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`;
+  const isAfricanWildDog = currentMascot.id === "african-wild-dog";
+  const icon = isWhaleShark
+    ? "icons/whale-shark-app-icon.png"
+    : isAfricanWildDog
+      ? "icons/african-wild-dog-mascot.png"
+      : `icons/${currentMascot.id}.svg`;
   document.documentElement.style.setProperty("--mascot-accent", currentMascot.accent);
   document.documentElement.style.setProperty("--mascot-soft", currentMascot.soft);
   document.documentElement.style.setProperty("--mascot-bg", currentMascot.bg);
@@ -393,9 +398,12 @@ function applyMascot() {
   setText("splashFact", currentMascot.fact);
   const walkingAnimal = document.querySelector("#walkingAnimal");
   walkingAnimal.classList.toggle("is-swimming", isWhaleShark);
+  walkingAnimal.classList.toggle("is-walking-dog", isAfricanWildDog);
   walkingAnimal.innerHTML = isWhaleShark
     ? `<img src="icons/whale-shark-mascot.png" alt="Whale Shark swimming">`
-    : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
+    : isAfricanWildDog
+      ? `<img src="icons/african-wild-dog-mascot.png" alt="African Wild Dog walking">`
+      : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
   setText("mascotChipName", currentMascot.name);
   setText("mascotBannerName", currentMascot.name);
   setText("mascotBannerFact", currentMascot.fact);
@@ -506,7 +514,11 @@ async function checkReminders() {
       const key = `${dayKey}-${time}-${task.id}`;
       if (sentReminders.has(key)) return;
       sentReminders.add(key);
-      const icon = currentMascot.id === "whale-shark" ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`;
+      const icon = currentMascot.id === "whale-shark"
+        ? "icons/whale-shark-app-icon.png"
+        : currentMascot.id === "african-wild-dog"
+          ? "icons/african-wild-dog-mascot.png"
+          : `icons/${currentMascot.id}.svg`;
       const body = `${currentMascot.name} says: time for ${task.name}. ${currentMascot.status} · ${currentMascot.population} estimated.`;
       sendBrowserNotification(`${currentMascot.emoji} Weekly reminder`, body, key, icon);
       showMascotToast("Task reminder", body);
@@ -515,7 +527,12 @@ async function checkReminders() {
 
 async function sendBrowserNotification(title, body, tag, customIcon = null) {
   if (!("Notification" in window) || Notification.permission !== "granted") return false;
-  const icon = customIcon || (currentMascot.id === "whale-shark" ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`);
+  const defaultIcon = currentMascot.id === "whale-shark"
+    ? "icons/whale-shark-app-icon.png"
+    : currentMascot.id === "african-wild-dog"
+      ? "icons/african-wild-dog-mascot.png"
+      : `icons/${currentMascot.id}.svg`;
+  const icon = customIcon || defaultIcon;
   try {
     if ("serviceWorker" in navigator) {
       const registration = await navigator.serviceWorker.ready;
