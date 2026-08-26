@@ -1,4 +1,4 @@
-const CACHE_NAME = "weekly-wildlife-v6";
+const CACHE_NAME = "weekly-wildlife-v7";
 const APP_FILES = [
   "./", "index.html", "styles.css", "app.js", "manifest.webmanifest",
   "icons/whooping-crane.svg", "icons/african-wild-dog.svg", "icons/african-wild-dog-mascot.png", "icons/white-rhino.svg",

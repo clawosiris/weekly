@@ -195,7 +195,7 @@ function renderDailyBars(week) {
       <div class="daily-row">
         <span>${dayNames[index]}</span>
         <div class="daily-track">
-          <div class="daily-fill" style="width: ${dayStats.percent}%"></div>
+          <div class="daily-fill" style="height: ${dayStats.percent}%"></div>
         </div>
         <span>${dayStats.percent}%</span>
       </div>
@@ -238,7 +238,7 @@ function renderDayCards(week) {
     const card = template.content.firstElementChild.cloneNode(true);
 
     card.querySelector(".day-name").textContent = longDayNames[index];
-    card.querySelector(".day-date").textContent = formatShortDate(day.date);
+    card.querySelector(".day-date").textContent = formatLongDate(day.date);
     card.querySelector(".small-donut").style.setProperty("--value", stats.percent);
     card.querySelector(".small-donut span").textContent = `${stats.percent}%`;
     card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed`;
@@ -634,6 +634,10 @@ function toDateInput(date) {
 
 function formatShortDate(date) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function formatLongDate(date) {
+  return date.toLocaleDateString(undefined, { month: "long", day: "numeric" });
 }
 
 function percent(done, total) {
