@@ -2,8 +2,16 @@ const STORAGE_KEY = "nora-weekly-dashboard-v1";
 const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const longDayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+const weeklyAnimals = [
+  { id: "whooping-crane", name: "Whooping Crane", emoji: "🪿", status: "Endangered", population: "~830", detail: "About 830 across wild and managed populations", fact: "One of North America's rarest birds, the whooping crane has made a remarkable recovery from only 21 birds in 1941.", accent: "#d94f4f", soft: "#ffe9e7", bg: "#fff8f3" },
+  { id: "african-wild-dog", name: "African Wild Dog", emoji: "🐕", status: "Endangered", population: "3,000–5,500", detail: "Estimated mature and adult animals remaining", fact: "Wild dogs live in close-knit packs and use teamwork to care for pups, hunt, and protect one another.", accent: "#b66b2c", soft: "#fff0cf", bg: "#fff9ed" },
+  { id: "white-rhino", name: "White Rhino", emoji: "🦏", status: "Near Threatened", population: "15,752", detail: "Estimated population at the end of 2024", fact: "White rhinos are grazers. Their wide, square lips are perfectly shaped for clipping short grass.", accent: "#54745d", soft: "#e3f0e4", bg: "#f4faf4" },
+  { id: "whale-shark", name: "Whale Shark", emoji: "🦈", status: "Endangered", population: "120,000–240,000", detail: "Estimated adult whale sharks remaining worldwide", fact: "The world's largest fish is a gentle filter feeder, recognizable by a spot pattern unique to each individual.", accent: "#287aa2", soft: "#dff3fb", bg: "#f1fbff" },
+  { id: "woylie", name: "Woylie", emoji: "🦘", status: "Critically Endangered", population: "<15,000", detail: "Estimated animals remaining", fact: "This small Australian marsupial turns over soil while foraging, helping forests recycle nutrients and spread fungi.", accent: "#8f5f37", soft: "#f4e6d8", bg: "#fff9f3" }
+];
+
 const defaultTasks = [
-  { id: "task-steps", name: "10 minute walk", category: "Health", days: [0, 1, 2, 3, 4, 5, 6] },
+  { id: "task-steps", name: "10 minute walk", category: "Health", days: [0, 1, 2, 3, 4, 5, 6], reminder: "16:00", reminderEnabled: false },
   { id: "task-water", name: "Drink water with each meal", category: "Health", days: [0, 1, 2, 3, 4, 5, 6] },
   { id: "task-meals", name: "Prep or log meals", category: "Health", days: [0, 1, 2, 3, 4, 5, 6] },
   { id: "task-stretch", name: "Stretch or mobility", category: "Health", days: [0, 2, 4, 6] },
@@ -15,6 +23,8 @@ const defaultTasks = [
 ];
 
 let state = loadState();
+const currentMascot = getWeeklyMascot();
+const sentReminders = new Set();
 
 const els = {
   weekStart: document.querySelector("#weekStart"),
@@ -33,16 +43,31 @@ const els = {
   newTaskDays: document.querySelector("#newTaskDays"),
   mapperHead: document.querySelector("#mapperHead"),
   mapperBody: document.querySelector("#mapperBody"),
-  taskTotal: document.querySelector("#taskTotal")
+  taskTotal: document.querySelector("#taskTotal"),
+  taskReminder: document.querySelector("#taskReminder"),
+  reminderList: document.querySelector("#reminderList"),
+  enableNotifications: document.querySelector("#enableNotifications"),
+  notificationStatus: document.querySelector("#notificationStatus"),
+  confirmReminders: document.querySelector("#confirmReminders"),
+  reminderConfirmStatus: document.querySelector("#reminderConfirmStatus"),
+  mascotSplash: document.querySelector("#mascotSplash"),
+  skipSplash: document.querySelector("#skipSplash"),
+  mascotChip: document.querySelector("#mascotChip"),
+  mascotToast: document.querySelector("#mascotToast")
 };
 
 init();
 
 function init() {
+  applyMascot();
   renderDayPicker();
   bindEvents();
   normalizeWeekInput();
   render();
+  registerServiceWorker();
+  window.setInterval(checkReminders, 30000);
+  checkReminders();
+  window.setTimeout(closeSplash, 4800);
 }
 
 function loadState() {
@@ -52,7 +77,7 @@ function loadState() {
       const parsed = JSON.parse(saved);
       return {
         weekStart: parsed.weekStart || toDateInput(startOfWeek(new Date())),
-        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : defaultTasks,
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks.map(normalizeTask) : defaultTasks.map(normalizeTask),
         completions: parsed.completions && typeof parsed.completions === "object" ? parsed.completions : {}
       };
     } catch {
@@ -62,7 +87,7 @@ function loadState() {
 
   return {
     weekStart: toDateInput(startOfWeek(new Date())),
-    tasks: defaultTasks,
+    tasks: defaultTasks.map(normalizeTask),
     completions: {}
   };
 }
@@ -72,6 +97,10 @@ function saveState() {
 }
 
 function bindEvents() {
+  els.skipSplash.addEventListener("click", closeSplash);
+  els.mascotChip.addEventListener("click", openSplash);
+  els.enableNotifications.addEventListener("click", enableNotifications);
+  els.confirmReminders.addEventListener("click", confirmReminders);
   els.weekStart.addEventListener("change", () => {
     state.weekStart = toDateInput(startOfWeek(new Date(`${els.weekStart.value}T00:00:00`)));
     saveState();
@@ -100,7 +129,9 @@ function bindEvents() {
       id: `task-${Date.now().toString(36)}`,
       name,
       category: els.taskCategory.value,
-      days: days.length ? days : [0, 1, 2, 3, 4, 5, 6]
+      days: days.length ? days : [0, 1, 2, 3, 4, 5, 6],
+      reminder: els.taskReminder.value || "",
+      reminderEnabled: Boolean(els.taskReminder.value)
     });
     els.taskForm.reset();
     els.newTaskDays.querySelectorAll("input").forEach((input) => {
@@ -126,6 +157,7 @@ function render() {
   renderHabitMatrix(week);
   renderDayCards(week);
   renderMapper();
+  renderReminders();
 }
 
 function normalizeWeekInput() {
@@ -163,7 +195,7 @@ function renderDailyBars(week) {
       <div class="daily-row">
         <span>${dayNames[index]}</span>
         <div class="daily-track">
-          <div class="daily-fill" style="width: ${dayStats.percent}%"></div>
+          <div class="daily-fill" style="height: ${dayStats.percent}%"></div>
         </div>
         <span>${dayStats.percent}%</span>
       </div>
@@ -206,7 +238,7 @@ function renderDayCards(week) {
     const card = template.content.firstElementChild.cloneNode(true);
 
     card.querySelector(".day-name").textContent = longDayNames[index];
-    card.querySelector(".day-date").textContent = formatShortDate(day.date);
+    card.querySelector(".day-date").textContent = formatLongDate(day.date);
     card.querySelector(".small-donut").style.setProperty("--value", stats.percent);
     card.querySelector(".small-donut span").textContent = `${stats.percent}%`;
     card.querySelector(".completion-copy").textContent = `${stats.done}/${stats.total} completed`;
@@ -292,6 +324,240 @@ function renderMapper() {
   });
 }
 
+function renderReminders() {
+  if (!state.tasks.length) {
+    els.reminderList.innerHTML = `<p class="empty-state">Add a task first, then choose its reminder time.</p>`;
+    return;
+  }
+
+  els.reminderList.innerHTML = state.tasks.map((task) => `
+    <div class="reminder-row">
+      <label class="reminder-toggle">
+        <input type="checkbox" data-reminder-enabled="${task.id}" ${task.reminderEnabled ? "checked" : ""}>
+        <span><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(task.category)}</small></span>
+      </label>
+      <input type="time" data-reminder-time="${task.id}" value="${escapeHtml(task.reminder || "")}" aria-label="Reminder time for ${escapeHtml(task.name)}">
+    </div>
+  `).join("");
+
+  els.reminderList.querySelectorAll("[data-reminder-enabled]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const task = state.tasks.find((item) => item.id === input.dataset.reminderEnabled);
+      if (!task) return;
+      task.reminderEnabled = input.checked;
+      if (input.checked && !task.reminder) task.reminder = "09:00";
+      saveState();
+      renderReminders();
+    });
+  });
+
+  els.reminderList.querySelectorAll("[data-reminder-time]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const task = state.tasks.find((item) => item.id === input.dataset.reminderTime);
+      if (!task) return;
+      task.reminder = input.value;
+      task.reminderEnabled = Boolean(input.value);
+      saveState();
+      renderReminders();
+    });
+  });
+}
+
+function normalizeTask(task) {
+  return {
+    ...task,
+    days: Array.isArray(task.days) ? task.days : [],
+    reminder: typeof task.reminder === "string" ? task.reminder : "",
+    reminderEnabled: Boolean(task.reminderEnabled)
+  };
+}
+
+function getWeeklyMascot() {
+  const monday = startOfWeek(new Date());
+  const weekNumber = Math.floor(monday.getTime() / 604800000);
+  return weeklyAnimals[((weekNumber % weeklyAnimals.length) + weeklyAnimals.length) % weeklyAnimals.length];
+}
+
+function applyMascot() {
+  const isWhaleShark = currentMascot.id === "whale-shark";
+  const isAfricanWildDog = currentMascot.id === "african-wild-dog";
+  const isWhoopingCrane = currentMascot.id === "whooping-crane";
+  const icon = getMascotIcon();
+  document.documentElement.style.setProperty("--mascot-accent", currentMascot.accent);
+  document.documentElement.style.setProperty("--mascot-soft", currentMascot.soft);
+  document.documentElement.style.setProperty("--mascot-bg", currentMascot.bg);
+  document.querySelector('meta[name="theme-color"]').content = currentMascot.accent;
+  document.querySelector("#appIcon").href = icon;
+
+  setText("splashName", currentMascot.name);
+  setText("splashStatus", currentMascot.status);
+  setText("splashPopulation", `${currentMascot.population} ${currentMascot.detail.toLowerCase()}`);
+  setText("splashFact", currentMascot.fact);
+  const walkingAnimal = document.querySelector("#walkingAnimal");
+  walkingAnimal.classList.toggle("is-swimming", isWhaleShark);
+  walkingAnimal.classList.toggle("is-walking-dog", isAfricanWildDog);
+  walkingAnimal.classList.toggle("is-walking-crane", isWhoopingCrane);
+  walkingAnimal.innerHTML = isWhaleShark
+    ? `<img src="icons/whale-shark-mascot.png" alt="Whale Shark swimming">`
+    : isAfricanWildDog
+      ? `<img src="icons/african-wild-dog-mascot.png" alt="African Wild Dog walking">`
+      : isWhoopingCrane
+        ? `<img src="icons/whooping-crane-mascot.png" alt="Whooping Crane walking">`
+        : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
+  setText("mascotChipName", currentMascot.name);
+  setText("mascotBannerName", currentMascot.name);
+  setText("mascotBannerFact", currentMascot.fact);
+  setText("mascotBannerStatus", currentMascot.status);
+  setText("mascotBannerPopulation", currentMascot.population);
+
+  ["mascotChipIcon", "mascotBannerIcon", "notificationMascot", "toastIcon"].forEach((id) => {
+    const image = document.querySelector(`#${id}`);
+    image.src = icon;
+    image.alt = currentMascot.name;
+  });
+
+  if ("Notification" in window) {
+    els.notificationStatus.textContent = notificationPermissionLabel();
+  } else {
+    els.notificationStatus.textContent = "Notifications are not supported in this browser";
+    els.enableNotifications.disabled = true;
+  }
+}
+
+function setText(id, value) {
+  document.querySelector(`#${id}`).textContent = value;
+}
+
+function closeSplash() {
+  els.mascotSplash.classList.add("is-hidden");
+}
+
+function openSplash() {
+  els.mascotSplash.classList.remove("is-hidden");
+  const walker = document.querySelector("#walkingAnimal");
+  walker.style.animation = "none";
+  window.requestAnimationFrame(() => { walker.style.animation = ""; });
+}
+
+async function enableNotifications() {
+  if (!("Notification" in window)) return;
+  const permission = await Notification.requestPermission();
+  els.notificationStatus.textContent = notificationPermissionLabel();
+  if (permission === "granted") {
+    showMascotToast("Notifications are on", `${currentMascot.name} will remind you at the times you choose.`);
+    await sendBrowserNotification("Weekly notifications are on", `${currentMascot.name} is ready to remind you.` , "weekly-permission-test");
+  }
+}
+
+async function confirmReminders() {
+  const rows = [...els.reminderList.querySelectorAll(".reminder-row")];
+  rows.forEach((row) => {
+    const enabledInput = row.querySelector("[data-reminder-enabled]");
+    const timeInput = row.querySelector("[data-reminder-time]");
+    const task = state.tasks.find((item) => item.id === timeInput?.dataset.reminderTime);
+    if (!task) return;
+    task.reminder = timeInput.value;
+    task.reminderEnabled = Boolean(enabledInput.checked && timeInput.value);
+  });
+  saveState();
+  renderReminders();
+
+  if (!("Notification" in window)) {
+    setReminderStatus("This browser does not support notifications.", true);
+    return;
+  }
+
+  let permission = Notification.permission;
+  if (permission === "default") permission = await Notification.requestPermission();
+  els.notificationStatus.textContent = notificationPermissionLabel();
+
+  if (permission !== "granted") {
+    setReminderStatus("Notifications are blocked. Open Chrome settings → Site settings → Notifications → allow Weekly.", true);
+    return;
+  }
+
+  const enabledCount = state.tasks.filter((task) => task.reminderEnabled && task.reminder).length;
+  if (!enabledCount) {
+    setReminderStatus("Saved, but no reminders are switched on with a time selected.", true);
+    return;
+  }
+
+  const worked = await sendBrowserNotification(
+    `${currentMascot.emoji} Reminders confirmed`,
+    `${currentMascot.name} will watch ${enabledCount} ${enabledCount === 1 ? "reminder" : "reminders"}. Keep Weekly open for scheduled web reminders.`,
+    `weekly-confirm-${Date.now()}`
+  );
+  setReminderStatus(worked ? `Saved ${enabledCount} ${enabledCount === 1 ? "reminder" : "reminders"}. A test notification was sent.` : "Saved, but Android did not accept the test notification. Check Weekly's notification permission.", !worked);
+}
+
+function setReminderStatus(message, isError = false) {
+  els.reminderConfirmStatus.textContent = message;
+  els.reminderConfirmStatus.classList.toggle("is-error", isError);
+}
+
+function notificationPermissionLabel() {
+  if (Notification.permission === "granted") return "Notifications enabled";
+  if (Notification.permission === "denied") return "Notifications blocked in browser settings";
+  return "Permission not requested";
+}
+
+async function checkReminders() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const now = new Date();
+  const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const dayKey = toDateInput(now);
+
+  state.tasks
+    .filter((task) => task.reminderEnabled && task.reminder === time && task.days.includes(dayIndex) && !isComplete(dayKey, task.id))
+    .forEach((task) => {
+      const key = `${dayKey}-${time}-${task.id}`;
+      if (sentReminders.has(key)) return;
+      sentReminders.add(key);
+      const icon = getMascotIcon();
+      const body = `${currentMascot.name} says: time for ${task.name}. ${currentMascot.status} · ${currentMascot.population} estimated.`;
+      sendBrowserNotification(`${currentMascot.emoji} Weekly reminder`, body, key, icon);
+      showMascotToast("Task reminder", body);
+    });
+}
+
+async function sendBrowserNotification(title, body, tag, customIcon = null) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return false;
+  const defaultIcon = getMascotIcon();
+  const icon = customIcon || defaultIcon;
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, { body, icon, badge: icon, tag });
+    } else {
+      new Notification(title, { body, icon, tag });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getMascotIcon() {
+  if (currentMascot.id === "whale-shark") return "icons/whale-shark-app-icon.png";
+  if (currentMascot.id === "african-wild-dog") return "icons/african-wild-dog-mascot.png";
+  if (currentMascot.id === "whooping-crane") return "icons/whooping-crane-mascot.png";
+  return `icons/${currentMascot.id}.svg`;
+}
+
+function showMascotToast(title, body) {
+  setText("toastTitle", title);
+  setText("toastBody", body);
+  els.mascotToast.classList.add("is-visible");
+  window.setTimeout(() => els.mascotToast.classList.remove("is-visible"), 5000);
+}
+
+function registerServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  }
+}
+
 function getWeekDays() {
   const start = new Date(`${state.weekStart}T00:00:00`);
   return dayNames.map((_, index) => {
@@ -369,12 +635,16 @@ function formatShortDate(date) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function formatLongDate(date) {
+  return date.toLocaleDateString(undefined, { month: "long", day: "numeric" });
+}
+
 function percent(done, total) {
   return total ? Math.round((done / total) * 100) : 0;
 }
 
 function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (char) => ({
+  return String(value).replace(/[&<>"']/g, (char) => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",

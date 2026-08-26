@@ -1,0 +1,13 @@
+{
+  "name": "Weekly",
+  "short_name": "Weekly",
+  "description": "A weekly planner guided by a different W-animal mascot.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#d7f4fb",
+  "theme_color": "#287aa2",
+  "icons": [
+    { "src": "icons/whale-shark-app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
