@@ -6,7 +6,7 @@ const weeklyAnimals = [
   { id: "whooping-crane", name: "Whooping Crane", emoji: "🪿", status: "Endangered", population: "~830", detail: "About 830 across wild and managed populations", fact: "One of North America's rarest birds, the whooping crane has made a remarkable recovery from only 21 birds in 1941.", accent: "#d94f4f", soft: "#ffe9e7", bg: "#fff8f3" },
   { id: "african-wild-dog", name: "African Wild Dog", emoji: "🐕", status: "Endangered", population: "3,000–5,500", detail: "Estimated mature and adult animals remaining", fact: "Wild dogs live in close-knit packs and use teamwork to care for pups, hunt, and protect one another.", accent: "#b66b2c", soft: "#fff0cf", bg: "#fff9ed" },
   { id: "white-rhino", name: "White Rhino", emoji: "🦏", status: "Near Threatened", population: "15,752", detail: "Estimated population at the end of 2024", fact: "White rhinos are grazers. Their wide, square lips are perfectly shaped for clipping short grass.", accent: "#54745d", soft: "#e3f0e4", bg: "#f4faf4" },
-  { id: "whale-shark", name: "Whale Shark", emoji: "🦈", status: "Endangered", population: "Unknown", detail: "No exact global count · population has declined by over 50%", fact: "The world's largest fish is a gentle filter feeder, recognizable by a spot pattern unique to each individual.", accent: "#287aa2", soft: "#dff3fb", bg: "#f1fbff" },
+  { id: "whale-shark", name: "Whale Shark", emoji: "🦈", status: "Endangered", population: "120,000–240,000", detail: "Estimated adult whale sharks remaining worldwide", fact: "The world's largest fish is a gentle filter feeder, recognizable by a spot pattern unique to each individual.", accent: "#287aa2", soft: "#dff3fb", bg: "#f1fbff" },
   { id: "woylie", name: "Woylie", emoji: "🦘", status: "Critically Endangered", population: "<15,000", detail: "Estimated animals remaining", fact: "This small Australian marsupial turns over soil while foraging, helping forests recycle nutrients and spread fungi.", accent: "#8f5f37", soft: "#f4e6d8", bg: "#fff9f3" }
 ];
 
@@ -380,7 +380,12 @@ function getWeeklyMascot() {
 
 function applyMascot() {
   const isWhaleShark = currentMascot.id === "whale-shark";
-  const icon = isWhaleShark ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`;
+  const isAfricanWildDog = currentMascot.id === "african-wild-dog";
+  const icon = isWhaleShark
+    ? "icons/whale-shark-app-icon.png"
+    : isAfricanWildDog
+      ? "icons/african-wild-dog-mascot.png"
+      : `icons/${currentMascot.id}.svg`;
   document.documentElement.style.setProperty("--mascot-accent", currentMascot.accent);
   document.documentElement.style.setProperty("--mascot-soft", currentMascot.soft);
   document.documentElement.style.setProperty("--mascot-bg", currentMascot.bg);
@@ -389,13 +394,16 @@ function applyMascot() {
 
   setText("splashName", currentMascot.name);
   setText("splashStatus", currentMascot.status);
-  setText("splashPopulation", currentMascot.detail);
+  setText("splashPopulation", `${currentMascot.population} ${currentMascot.detail.toLowerCase()}`);
   setText("splashFact", currentMascot.fact);
   const walkingAnimal = document.querySelector("#walkingAnimal");
   walkingAnimal.classList.toggle("is-swimming", isWhaleShark);
+  walkingAnimal.classList.toggle("is-walking-dog", isAfricanWildDog);
   walkingAnimal.innerHTML = isWhaleShark
     ? `<img src="icons/whale-shark-mascot.png" alt="Whale Shark swimming">`
-    : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
+    : isAfricanWildDog
+      ? `<img src="icons/african-wild-dog-mascot.png" alt="African Wild Dog walking">`
+      : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
   setText("mascotChipName", currentMascot.name);
   setText("mascotBannerName", currentMascot.name);
   setText("mascotBannerFact", currentMascot.fact);
@@ -506,7 +514,11 @@ async function checkReminders() {
       const key = `${dayKey}-${time}-${task.id}`;
       if (sentReminders.has(key)) return;
       sentReminders.add(key);
-      const icon = currentMascot.id === "whale-shark" ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`;
+      const icon = currentMascot.id === "whale-shark"
+        ? "icons/whale-shark-app-icon.png"
+        : currentMascot.id === "african-wild-dog"
+          ? "icons/african-wild-dog-mascot.png"
+          : `icons/${currentMascot.id}.svg`;
       const body = `${currentMascot.name} says: time for ${task.name}. ${currentMascot.status} · ${currentMascot.population} estimated.`;
       sendBrowserNotification(`${currentMascot.emoji} Weekly reminder`, body, key, icon);
       showMascotToast("Task reminder", body);
@@ -515,7 +527,12 @@ async function checkReminders() {
 
 async function sendBrowserNotification(title, body, tag, customIcon = null) {
   if (!("Notification" in window) || Notification.permission !== "granted") return false;
-  const icon = customIcon || (currentMascot.id === "whale-shark" ? "icons/whale-shark-app-icon.png" : `icons/${currentMascot.id}.svg`);
+  const defaultIcon = currentMascot.id === "whale-shark"
+    ? "icons/whale-shark-app-icon.png"
+    : currentMascot.id === "african-wild-dog"
+      ? "icons/african-wild-dog-mascot.png"
+      : `icons/${currentMascot.id}.svg`;
+  const icon = customIcon || defaultIcon;
   try {
     if ("serviceWorker" in navigator) {
       const registration = await navigator.serviceWorker.ready;
