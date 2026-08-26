@@ -402,7 +402,7 @@ function applyMascot() {
     : isAfricanWildDog
       ? `<img src="icons/african-wild-dog-mascot.png" alt="African Wild Dog walking">`
       : isWhoopingCrane
-        ? `<img src="icons/whooping-crane-mascot.svg" alt="Whooping Crane walking">`
+        ? `<img src="icons/whooping-crane-mascot.png" alt="Whooping Crane walking">`
         : `<span aria-hidden="true">${currentMascot.emoji}</span>`;
   setText("mascotChipName", currentMascot.name);
   setText("mascotBannerName", currentMascot.name);
@@ -541,7 +541,7 @@ async function sendBrowserNotification(title, body, tag, customIcon = null) {
 function getMascotIcon() {
   if (currentMascot.id === "whale-shark") return "icons/whale-shark-app-icon.png";
   if (currentMascot.id === "african-wild-dog") return "icons/african-wild-dog-mascot.png";
-  if (currentMascot.id === "whooping-crane") return "icons/whooping-crane-mascot.svg";
+  if (currentMascot.id === "whooping-crane") return "icons/whooping-crane-mascot.png";
   return `icons/${currentMascot.id}.svg`;
 }
 
