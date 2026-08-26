@@ -23,7 +23,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(238, 242, 246, 0.95), rgba(251, 252, 253, 0.55) 230px),
+    linear-gradient(180deg, rgba(232, 238, 243, 0.9), rgba(251, 252, 253, 0.4) 280px),
     var(--paper);
   color: var(--ink);
 }
@@ -39,24 +39,17 @@ button {
 }
 
 .app-shell {
-  width: min(1900px, calc(100% - 26px));
+  width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 14px 0 32px;
+  padding: 24px 0 40px;
 }
 
 .topbar {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto minmax(130px, 1fr);
-  align-items: center;
-  gap: 16px;
-  padding: 4px 0 12px;
-}
-
-.topbar-date {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  min-width: 0;
+  padding: 8px 0 18px;
 }
 
 .eyebrow {
@@ -76,10 +69,8 @@ p {
 
 h1 {
   margin-bottom: 0;
-  color: var(--navy);
-  font-size: 2rem;
+  font-size: 2.25rem;
   line-height: 1.05;
-  text-align: center;
 }
 
 h2 {
@@ -142,7 +133,7 @@ h2 {
 .tabs {
   gap: 4px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 10px;
+  margin-bottom: 18px;
 }
 
 .tab-button {
@@ -167,7 +158,7 @@ h2 {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(220px, 0.85fr) minmax(280px, 1.35fr) minmax(320px, 1.5fr) minmax(280px, 1.25fr);
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -182,21 +173,18 @@ h2 {
 
 .panel {
   min-width: 0;
-  padding: 0 12px 12px;
+  padding: 14px;
 }
 
 .panel-heading {
   justify-content: space-between;
   gap: 12px;
-  margin: 0 -12px 12px;
-  min-height: 34px;
-  padding: 7px 12px;
-  background: var(--navy);
-  color: #fff;
+  margin-bottom: 12px;
+  color: var(--navy);
 }
 
 .panel-heading span {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--muted);
   font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
@@ -222,7 +210,7 @@ h2 {
 }
 
 .donut {
-  width: min(185px, 78%);
+  width: min(172px, 100%);
   aspect-ratio: 1;
 }
 
@@ -249,7 +237,7 @@ h2 {
   grid-template-columns: repeat(7, minmax(28px, 1fr));
   align-items: end;
   gap: 10px;
-  min-height: 225px;
+  min-height: 210px;
   padding: 8px 4px 0;
 }
 
@@ -264,8 +252,8 @@ h2 {
 .bar-stack {
   display: flex;
   align-items: flex-end;
-  height: 184px;
-  background: #f4e8e6;
+  height: 172px;
+  background: #edf3f5;
   border-radius: 6px 6px 2px 2px;
   overflow: hidden;
 }
@@ -273,7 +261,7 @@ h2 {
 .bar-fill {
   width: 100%;
   min-height: 3px;
-  background: linear-gradient(180deg, #e5aaa1, #c17875);
+  background: linear-gradient(180deg, var(--sky), var(--navy));
 }
 
 .bar label,
@@ -305,7 +293,7 @@ h2 {
 .mapper-table th,
 .mapper-table td {
   border-bottom: 1px solid var(--line);
-  padding: 6px 5px;
+  padding: 7px 6px;
   text-align: center;
 }
 
@@ -346,20 +334,14 @@ h2 {
 
 .horizontal-bars {
   display: grid;
-  grid-template-columns: repeat(7, minmax(22px, 1fr));
-  align-items: end;
   gap: 10px;
-  min-height: 225px;
-  padding: 8px 4px 0;
 }
 
 .daily-row {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  align-items: end;
-  justify-items: center;
-  gap: 8px;
-  height: 100%;
+  grid-template-columns: 42px 1fr 44px;
+  align-items: center;
+  gap: 10px;
 }
 
 .daily-row span {
@@ -368,17 +350,14 @@ h2 {
 }
 
 .daily-track {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  height: 166px;
-  border-radius: 6px 6px 2px 2px;
+  height: 12px;
+  border-radius: 999px;
   background: var(--rose-soft);
   overflow: hidden;
 }
 
 .daily-fill {
-  width: 100%;
+  height: 100%;
   border-radius: inherit;
   background: var(--rose);
 }
@@ -386,7 +365,7 @@ h2 {
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 
 .day-card {
@@ -395,68 +374,41 @@ h2 {
 }
 
 .day-card header {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  min-height: 60px;
-  padding: 9px 10px;
-  background: var(--navy);
+  padding: 12px;
+  background: linear-gradient(180deg, #f2f5f8, #fff);
   border-bottom: 1px solid var(--line);
 }
 
 .day-name {
   margin-bottom: 3px;
-  color: #fff;
+  color: var(--navy);
   font-size: 0.78rem;
   font-weight: 900;
 }
 
 .day-date {
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 0.78rem;
-}
-
-.day-progress-label,
-.task-section-title {
-  margin: 0;
-  min-height: 32px;
-  padding: 7px 10px;
-  background: var(--rose);
-  color: #603b3a;
-  font-size: 0.8rem;
-  font-weight: 900;
-  text-align: center;
+  color: var(--ink);
+  font-size: 0.98rem;
 }
 
 .completion-copy {
   margin: 0;
-  padding: 12px 10px 7px;
-  color: var(--ink);
+  padding: 10px 12px;
+  background: var(--rose-soft);
+  color: #9f6969;
   font-size: 0.82rem;
   font-weight: 900;
   text-align: center;
 }
 
-.day-card .small-donut {
-  width: min(118px, 74%);
-  margin: 2px auto 14px;
-}
-
-.day-card header .small-donut {
-  display: none;
-}
-
-.task-section-title {
-  background: #be7773;
-  color: #fff;
-}
-
 .checklist {
   display: grid;
   gap: 0;
-  max-height: 520px;
+  max-height: 420px;
   margin: 0;
   padding: 0;
   overflow: auto;
@@ -472,10 +424,10 @@ h2 {
   grid-template-columns: 22px 1fr;
   align-items: start;
   gap: 9px;
-  min-height: 38px;
-  padding: 8px 9px;
+  min-height: 44px;
+  padding: 10px 12px;
   color: var(--ink);
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   line-height: 1.25;
 }
 
@@ -702,18 +654,3 @@ h2 {
 
 /* Whooping crane uses a reference-inspired illustrated mascot with long legs, red crown, black mask, and wing tips. */
 .walking-animal.is-walking-crane{width:clamp(250px,43vw,590px);bottom:5%;font-size:0;animation:crane-cross 7.5s linear infinite,crane-bob .72s ease-in-out infinite alternate;filter:drop-shadow(0 24px 16px rgba(30,42,46,.2))}.walking-animal.is-walking-crane img{display:block;width:100%;transform-origin:48% 87%;animation:crane-strut .72s ease-in-out infinite alternate}.mascot-chip img[src$="whooping-crane-mascot.svg"],.mascot-banner>img[src$="whooping-crane-mascot.svg"],.notification-card img[src$="whooping-crane-mascot.svg"],.mascot-toast img[src$="whooping-crane-mascot.svg"]{background:#fff8f3;object-fit:contain}@keyframes crane-cross{from{left:-48%}to{left:108%}}@keyframes crane-bob{from{translate:0 0}to{translate:0 -7px}}@keyframes crane-strut{from{transform:rotate(-.9deg) scaleY(.99)}to{transform:rotate(1.1deg) scaleY(1.01)}}@media(prefers-reduced-motion:reduce){.walking-animal.is-walking-crane{left:50%;translate:-50% 0;animation:none}.walking-animal.is-walking-crane img{animation:none}}
-
-/* Computer testing layout: wide planner board inspired by the spreadsheet mockup. */
-#dashboardView .mascot-banner{display:none}.topbar .date-field{grid-template-columns:auto 170px;align-items:center;color:var(--ink);font-size:.82rem}.topbar .date-field span{font-weight:900}.topbar .date-field input{min-height:34px}.topbar .icon-button{width:36px;min-height:34px}.tabs{justify-content:center}.tab-button{min-height:34px;border-radius:4px 4px 0 0}.summary-grid>.panel{min-height:284px}.summary-grid .panel-heading{justify-content:center;text-align:center}.weekly-progress .panel-heading{width:calc(100% + 24px)}.weekly-progress{align-content:start}.weekly-progress .donut{margin-top:20px}.mini-matrix table{table-layout:fixed}.mini-matrix th:first-child,.mini-matrix td:first-child{width:42%;text-align:right}.mini-matrix th:not(:first-child),.mini-matrix td:not(:first-child){width:8.28%}.mini-matrix .checkmark{width:16px;height:16px;border-radius:3px}.horizontal-bars .daily-row>span:first-child{order:3;max-width:68px;min-height:46px;writing-mode:sideways-lr;color:var(--ink);font-size:.68rem;text-align:right}.horizontal-bars .daily-track{order:2}.horizontal-bars .daily-row>span:last-child{order:1;color:var(--muted);font-size:.68rem}.days-grid{align-items:start}.day-card{box-shadow:0 8px 22px rgba(39,52,69,.08)}.day-card header{justify-items:center;text-align:center}.day-card header>div{min-width:0}.day-card .small-donut{display:grid}.day-card .empty-state{min-height:186px}.checklist li:nth-child(even){background:#fbfcfd}.checklist label span{overflow-wrap:anywhere}
-
-@media (min-width: 1181px) {
-  .view.is-active#dashboardView{display:grid;grid-template-rows:auto auto;gap:0}.summary-grid{grid-template-columns:1fr 2fr 2.1fr 2fr}.days-grid{grid-template-columns:repeat(7,minmax(132px,1fr))}.day-card{min-height:660px}.checklist{max-height:384px}
-}
-
-@media (max-width: 1180px) {
-  .topbar{grid-template-columns:1fr;justify-items:stretch}.topbar h1{text-align:left}.topbar-date{flex-wrap:wrap}.topbar-actions{justify-content:flex-start}.summary-grid>.panel{min-height:0}.horizontal-bars .daily-row>span:first-child{writing-mode:horizontal-tb;min-height:0}
-}
-
-@media (max-width: 760px) {
-  .topbar .date-field{grid-template-columns:1fr}.topbar-date{display:grid}.topbar .mascot-chip{order:0}.tabs{justify-content:flex-start}.summary-grid{gap:10px}.days-grid{gap:10px}.day-card{min-height:0}.day-card .small-donut{width:112px}.checklist{max-height:none}
-}

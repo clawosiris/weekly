@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <section class="mascot-splash is-hidden" id="mascotSplash" aria-label="Animal of the week">
+    <section class="mascot-splash" id="mascotSplash" aria-label="Animal of the week">
       <button class="splash-skip" id="skipSplash" type="button">Enter Weekly →</button>
       <div class="splash-copy">
         <p class="splash-kicker">Weekly mascot</p>
@@ -22,21 +22,22 @@
     </section>
     <div class="app-shell">
       <header class="topbar">
-        <div class="topbar-date">
-          <button class="mascot-chip" id="mascotChip" type="button" aria-label="Open this week's mascot">
-            <img id="mascotChipIcon" src="icons/whooping-crane.svg" alt="">
-            <span><small>This week</small><strong id="mascotChipName">Whooping Crane</strong></span>
+        <div>
+          <p class="eyebrow">Weekly planner</p>
+          <h1>Checklist Dashboard</h1>
+        </div>
+        <button class="mascot-chip" id="mascotChip" type="button" aria-label="Open this week's mascot">
+          <img id="mascotChipIcon" src="icons/whooping-crane.svg" alt="">
+          <span><small>This week</small><strong id="mascotChipName">Whooping Crane</strong></span>
+        </button>
+        <div class="topbar-actions" aria-label="Week controls">
+          <button class="icon-button" id="previousWeek" type="button" title="Previous week" aria-label="Previous week">
+            <span aria-hidden="true">‹</span>
           </button>
           <label class="date-field">
             <span>Week of</span>
             <input id="weekStart" type="date">
           </label>
-        </div>
-        <h1>Weekly planner</h1>
-        <div class="topbar-actions" aria-label="Week controls">
-          <button class="icon-button" id="previousWeek" type="button" title="Previous week" aria-label="Previous week">
-            <span aria-hidden="true">‹</span>
-          </button>
           <button class="icon-button" id="nextWeek" type="button" title="Next week" aria-label="Next week">
             <span aria-hidden="true">›</span>
           </button>
@@ -83,7 +84,7 @@
 
             <article class="panel chart-panel">
               <div class="panel-heading">
-                <h2>Habits Progress</h2>
+                <h2>Daily Completion</h2>
               </div>
               <div class="horizontal-bars" id="dailyBars" aria-label="Daily completion percentages"></div>
             </article>
@@ -167,13 +168,11 @@
             <p class="day-name"></p>
             <h2 class="day-date"></h2>
           </div>
+          <div class="small-donut" style="--value: 0">
+            <span>0%</span>
+          </div>
         </header>
-        <p class="day-progress-label">Progress</p>
         <p class="completion-copy">0/0 completed</p>
-        <div class="small-donut" style="--value: 0">
-          <span>0%</span>
-        </div>
-        <p class="task-section-title">Tasks</p>
         <ul class="checklist"></ul>
       </article>
     </template>
